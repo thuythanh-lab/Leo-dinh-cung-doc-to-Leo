@@ -13,7 +13,7 @@ Tested 25 November 2026 in headless Chrome on Windows, against the deployed site
 
 All seven mandatory achievements were unlocked. Because the bot was invulnerable, "Unexpectedly Productive" here only shows that it triggers.
 
-## System checks on the deployed site: 21 of 21 passed
+## System checks on the deployed site: 23 of 23 passed
 Menus and greyed-out options, intro, keyboard, pause, resume, CV, settings, saved volume, checkpoint, death and respawn, pits, refresh and Continue, assistant 10.0 s active (unaffected by pause) and 30 s cooldown, no softlock without the assistant, simulated touch run + jump, ending, return to map.
 
 ## Scene load

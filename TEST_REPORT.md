@@ -37,3 +37,10 @@ On the deployed site: level 6 completed by the bot in 105 s; levels 1 to 5 compl
 Levels 1 to 7 completed by the bot (invulnerable). Level 7 was also completed with damage on, on the local production build only. `finale.mjs`, `phase2.mjs`, `system.mjs`, `soundtrack.mjs`, `audio.mjs` and scene load checks all passed. Level 7 took the bot 63 s including the supervisor scene; the Reviewer #2 fight took 25 to 34 s. The level 7 page load timed out several times on a slow connection before completing.
 
 Not tested: human play, sound by ear, physical phones, Safari, Firefox. Levels 3 and 5 are still unproven end to end with damage on.
+
+# V3.1 stability (26 November 2026)
+Deployed site: whole game from a fresh save in one tab without reload (951 s, all 12 milestones, no console errors); repro, failures and stress suites. Local production build: the same, plus a 31-minute random-player soak (229 level visits, 203 forced deaths, 42 cinematic or menu visits; heap 6 to 21 MB, 57 fps start and end, no freezes or errors) and all earlier suites.
+
+One live one-tab run, made while the stress test ran beside it, failed when the bot missed a bounce in level 4; it passed alone. One live stress item ended on the pause menu because the test itself pressed Escape in the level; the check was corrected.
+
+Not tested: human play, physical phones, Safari, Firefox, a really minimised window (hidden-tab events were simulated), low-memory phones (the decoded soundtrack needs about 110 MB).

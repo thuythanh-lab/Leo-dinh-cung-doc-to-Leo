@@ -2,6 +2,10 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V3.0.1 - Continue fix
+- Continuing a saved Level 1 or 5 after breaking the Writer's Block no longer shows a black screen; existing saves work again
+- New tests rebuild every level from every saved state
+
 ## V3.0 - The Đốc Tờ Era (complete game)
 - Level 7: supervisor approval ("Not bad.") and the Reviewer #2 fight
 - Cinematics: the defence, beyond the summit, congratulatory letter, Academic Oracle with five career predictions

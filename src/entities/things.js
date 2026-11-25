@@ -119,7 +119,7 @@ export class Barrier extends Ent {
   update(dt) { if (this.sh > 0) { this.sh -= dt; this.x = this.z.x + Math.sin(this.sh / 12) * 2; } else this.x = this.z.x; }
 }
 export class Writers extends Barrier {
-  constructor(L, tx, ty, o = {}) { super(L, tx, ty, 'writers', { hp: O.writersHp, ...o }); this.play('writers'); this.lines = []; this.o.onBreak = () => { L.toast(TOAST.writersDone); o.onBreak && o.onBreak(); }; }
+  constructor(L, tx, ty, o = {}) { super(L, tx, ty, 'writers', { hp: O.writersHp, ...o }); this.lines = []; if (this.dead) return; /* already broken in this save */ this.play('writers'); this.o.onBreak = () => { L.toast(TOAST.writersDone); o.onBreak && o.onBreak(); }; }
   fr() { return this; }
   hit(d, by) { if (this.dead) return; const n = this.max - this.hp; const x = this.x - 10; const y = this.y - 50 + n * 9; const t = wtxt(this.L, x, y, pick(['thus', 'hence', 'etc.', 'we', 'data', 'idk']), 9, '#2c2038', { st: 0, ox: 0, depth: 12 }); this.lines.push(t); Audio.sfx('typing'); super.hit(d, by); if (this.dead) this.lines.forEach((q) => q.destroy()); }
 }

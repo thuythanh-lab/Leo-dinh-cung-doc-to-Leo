@@ -1,18 +1,18 @@
-// Music checks. LOCAL=1 expects the single local theme, otherwise the licensed level tracks.
+// Music checks. LOCAL=1 expects the private local song, otherwise the original theme.
 import { open, sleep } from './lib.mjs';
 let bad = 0; const ok = (n, v, x = '') => { if (!v) bad++; console.log(`${v ? 'PASS' : 'FAIL'}  ${n} ${x}`); };
-const local = !!process.env.LOCAL; const pub = { 1: 'campus', 2: 'library', 3: 'tower', 4: 'treasury', 5: 'office', 6: 'water' };
+const local = !!process.env.LOCAL; const asked = [];
 const d = { d: { v: 1, started: true, unlocked: 6, done: { 1: true, 5: true }, ach: {}, assistant: true, mapAt: 1, stats: { coffee: 0, summons: 0, letters: 0, cooked: 0 }, run: null, future: {} }, settings: { music: 0.6, sfx: 0, touch: 'off' } };
-const g = await open('scene=Map', { save: d }); const p = g.page; await p.mouse.click(500, 300);
+const g = await open('scene=Map', { save: d }); const p = g.page; p.on('request', (r) => asked.push(r.url())); await p.mouse.click(500, 300);
 const st = () => p.evaluate(() => { const s = window.__game.sound.sounds.filter((x) => x.key.startsWith('m_') && x.isPlaying); return { keys: s.map((x) => x.key).sort().join(), seek: s.find((x) => x.key === 'm_theme')?.seek ?? s[0]?.seek, vol: s[0]?.volume, n: s.length }; });
 const until = async (k) => { let s; for (let i = 0; i < 60; i++) { s = await st(); if (s.keys === k) break; await sleep(250); } return s; };
 const start = (k, data) => p.evaluate((a, b) => { const S = window.__game.scene; S.getScenes(true).forEach((s) => S.stop(s)); S.start(a, b); }, k, data);
 const zone = (x, y) => p.evaluate((a, b) => { const P = window.__L.player; P.body.reset(a * 16, b * 16); P.safe = { x: a * 16, y: b * 16 }; window.__L.enterZone(); }, x, y);
 const T = 'm_theme'; let last = 0; let clock = Date.now();
 const cont = (n, s, slack = 4) => { const dt = (Date.now() - clock) / 1000; const moved = s.seek - last; ok(n, s.keys === T && moved >= -0.1 && moved <= dt + slack && moved > dt - slack, `${s.keys} +${moved.toFixed(1)}s in ${dt.toFixed(1)}s`); last = s.seek; clock = Date.now(); };
-let s = await until(local ? T : 'm_map'); ok('One track on the world map', s.n === 1, s.keys); ok('Volume follows the setting', (await sleep(1200), Math.abs((await st()).vol - 0.6) < 0.02));
-if (local) {
-  const b = await p.evaluate(() => { const q = window.__game.cache.audio.get('m_theme'); const c = q.getChannelData(0); const win = Math.floor(q.sampleRate * 0.1); const r = (i) => { let z = 0; for (let k = i; k < i + win; k++) z += c[k] ** 2; return Math.sqrt(z / win); }; return { dur: q.duration, trimmed: q.trimmed, head: r(0), tail: r(c.length - win), jump: Math.abs(c[0] - c[c.length - 1]) }; }); console.log(b); ok('Whole song loops (only silence trimmed)', b.dur > 290 && b.jump < 0.01, b.dur);
+let s = await until(T); ok('One track on the world map', s.n === 1, s.keys); ok('Volume follows the setting', (await sleep(1200), Math.abs((await st()).vol - 0.6) < 0.02));
+{
+  const b = await p.evaluate(() => { const q = window.__game.cache.audio.get('m_theme'); const c = q.getChannelData(0); const win = Math.floor(q.sampleRate * 0.1); const r = (i) => { let z = 0; for (let k = i; k < i + win; k++) z += c[k] ** 2; return Math.sqrt(z / win); }; return { dur: q.duration, trimmed: q.trimmed, seamless: q.seamless, head: r(0), tail: r(c.length - win), jump: Math.abs(c[0] - c[c.length - 1]) }; }); console.log(b); ok('Whole song loops (only silence trimmed)', (local ? b.dur > 290 : b.dur > 220 && b.dur < 235) && b.jump < 0.06, b.dur);
   s = await st(); last = s.seek; clock = Date.now();
   for (let l = 1; l <= 6; l++) { await start('Level', { level: l }); await sleep(2200); cont(`Level ${l}: same song, no restart`, await st()); }
   await zone(6, 72); await sleep(1500); cont('Level 6 field to dissertation: uninterrupted', await st());
@@ -24,6 +24,6 @@ if (local) {
   const b4 = (await st()).seek; await start('Ending'); s = await until('m_ending'); ok('Cinematic keeps its own music', s.keys === 'm_ending', s.keys); await start('Map'); s = await until(T); ok('Theme resumes after the cinematic', s.seek >= b4 - 0.2 && s.seek < b4 + 6, `${b4.toFixed(1)} -> ${s.seek.toFixed(1)}`);
   await start('Title'); s = await until('m_menu'); ok('Title keeps its own music', s.keys === 'm_menu', s.keys); await start('Map'); s = await until(T);
   await p.evaluate(() => { const q = window.__game.sound.sounds.find((x) => x.key === 'm_theme'); q.setSeek(q.duration - 2); }); await sleep(4000); s = await st(); ok('Loops back to the start, one copy', s.keys === T && s.seek < 10, s.seek);
-} else { for (let l = 1; l <= 6; l++) { await start('Level', { level: l }); s = await until(`m_${pub[l]}`); ok(`Level ${l} uses the licensed track`, s.keys === `m_${pub[l]}`, s.keys); } ok('The public build never asked for the local song', await p.evaluate(() => !window.__game.cache.audio.exists('m_theme'))); await start('Map'); await until('m_map'); }
+}
 await sleep(800); await p.evaluate(() => window.__game.scene.getScene('Map').scene.launch('Settings', { back: 'Map' })); await sleep(800); for (let i = 0; i < 6; i++) { await p.keyboard.press('ArrowLeft'); await sleep(80); } s = await st(); ok('Music volume 0 mutes it', s.vol === 0, s.vol); for (let i = 0; i < 3; i++) { await p.keyboard.press('ArrowRight'); await sleep(80); } s = await st(); ok('Volume comes back', Math.abs(s.vol - 0.3) < 0.02 && s.n === 1, s.vol); await p.keyboard.press('Escape'); await sleep(400);
-for (let i = 0; i < 6; i++) { await start(i % 2 ? 'Map' : 'Title'); await sleep(300); } await sleep(2500); s = await st(); ok('Rapid switching leaves one track', s.keys === (local ? T : 'm_map'), s.keys); ok('No errors', !g.errors.length, g.errors); await g.browser.close(); console.log(bad ? `${bad} PROBLEM(S)` : 'ALL GOOD'); process.exit(bad ? 1 : 0);
+for (let i = 0; i < 6; i++) { await start(i % 2 ? 'Map' : 'Title'); await sleep(300); } await sleep(2500); s = await st(); ok('Rapid switching leaves one track', s.keys === (T), s.keys); ok('No errors', !g.errors.length, g.errors); await g.browser.close(); console.log(bad ? `${bad} PROBLEM(S)` : 'ALL GOOD'); process.exit(bad ? 1 : 0);

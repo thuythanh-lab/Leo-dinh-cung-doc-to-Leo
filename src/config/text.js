@@ -121,3 +121,8 @@ Object.assign(SIGNS, {
   p2plan: 'Day 1 of fieldwork.\nThe plan is laminated.', p2bridge: 'Bridge: 60% complete.\nSince 2009.', p2goat: 'Interview in progress.', p2bus: 'Next bus: Tuesday.\nNext buffalo: now.', p2rope: 'Maximum load:\none methodology.', p2station: 'Field station.\nWi-Fi: spiritual.',
   p2doc: 'thesis_final.docx\n(Not responding)', p2cloud: 'Forecast: deadlines,\n100% chance.', p2block: 'Chapter 2\n|', p2super: 'From: Supervisor\n"Quick comments :)"', p2super2: 'From: Supervisor\n"One more small thing."', p2last: 'Word count: yes.',
 });
+
+export const P_MUSIC = {
+  pick: 'Choose Your Own Soundtrack', mine: (n) => `Soundtrack: ${n}`, reset: 'Use the original soundtrack', loading: 'Loading your soundtrack...', saved: 'Saved on this device. It is never uploaded.', unsaved: 'Playing now, but this browser could not save it.', back: 'Original soundtrack restored.',
+  notMp3: 'Please choose an MP3 file.', tooBig: 'That file is too long (max 20 min, 60 MB).', bad: 'That MP3 could not be played.', unsupported: 'This browser cannot play a custom soundtrack.', failed: 'That did not work. Please try again.',
+};

@@ -2,6 +2,11 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V2.3 - Original orchestral theme and Choose Your Own Soundtrack
+- New original waltz (3:47, celesta, strings, woodwinds, harp, horn) is the continuous gameplay soundtrack on the public site
+- Settings: choose an MP3 from the device; kept in IndexedDB, never uploaded; one button restores the original
+- Play.bat keeps the private local song; boss, cinematic and menu music and sound effects unchanged
+
 ## V2.2 - One gameplay soundtrack (local)
 - Locally, the local MP3 replaces every level track and the world map theme as one continuous song; it survives level changes, deaths and respawns, and resumes after bosses and cinematics
 - Title, cinematic and boss music and all sound effects unchanged; crisis room ambience plays underneath

@@ -1,5 +1,5 @@
 import { Save } from './Save.js';
-import { THEME, GAMEPLAY, loadLocalTheme } from './localTheme.js';
+import { THEME, GAMEPLAY, loadTheme, builtIn, readPicked, store, forget } from './theme.js';
 
 export const MUSIC = ['menu', 'map', 'campus', 'library', 'water', 'garden', 'archive', 'tower', 'boss', 'treasury', 'office', 'boss2', 'ending', 'nature'];
 export const SFX = ['jump', 'coffee', 'special', 'hurt', 'cast', 'stomp', 'thud', 'stampno', 'stampyes', 'achieve', 'fanfare', 'secret', 'summon', 'vanish', 'checkpoint', 'splash', 'cooked', 'boing', 'rumble', 'laser', 'confetti', 'typing',
@@ -8,7 +8,7 @@ const GAIN = { step: 0.16, land: 0.4, text: 0.3, typing: 0.5, coffee: 0.55, jump
 
 /** Independent music / sfx volume, lazy-loaded tracks and cross-fades. */
 class AudioMan {
-  init(game) { this.game = game; this.cur = null; this.want = null; this.last = {}; this.pos = 0; this.local = loadLocalTheme(game).then((ok) => { this.localReady = true; this.localTheme = ok; }); }
+  init(game) { this.game = game; this.cur = null; this.want = null; this.last = {}; this.pos = 0; this.customName = null; this.ready = false; this.loading = loadTheme(game).then((t) => { this.ready = true; if (t && !this.theme) { game.cache.audio.add(`m_${THEME}`, t.buffer); this.theme = true; this.customName = t.name; } }); }
   sfx(k, o = {}) {
     if (!this.game || !this.game.cache.audio.exists(`s_${k}`)) return;
     const now = performance.now(); if (now - (this.last[k] || 0) < 35) return; this.last[k] = now;
@@ -17,8 +17,8 @@ class AudioMan {
   music(scene, k, fade = 900) {
     this.ask = k;
     if (GAMEPLAY.has(k)) {
-      if (!this.localReady) { this.local.then(() => { if (this.ask === k && scene.sys.isActive()) this.music(scene, k, fade); }); return; }
-      if (this.localTheme) { this.ambient(scene, k === 'nature'); k = THEME; }
+      if (!this.ready) { this.loading.then(() => { if (this.ask === k && scene.sys.isActive()) this.music(scene, k, fade); }); return; }
+      if (this.theme) { this.ambient(scene, k === 'nature'); k = THEME; }
     } else this.ambient(scene, false);
     if (this.want === k) return; this.want = k;
     const start = () => { if (this.want === k) this.swap(k, fade); };
@@ -27,13 +27,23 @@ class AudioMan {
     scene.load.audio(`m_${k}`, `assets/audio/music/${k}.mp3`); scene.load.once(`filecomplete-audio-m_${k}`, start); scene.load.start();
     scene.events.once('shutdown', () => { if (this.want === k && !(this.cur && this.cur.key === `m_${k}`) && !this.game.cache.audio.exists(`m_${k}`)) this.want = null; }); // left before it loaded: let the next scene ask again
   }
-  /** Wind and birds under the local theme (Emergency Existential Crisis Room). */
+  /** Wind and birds under the theme (Emergency Existential Crisis Room). */
   ambient(scene, on) {
     this.ambOn = on; if (!on) { const a = this.amb; this.amb = null; if (a) this.ramp(a, 0, 600, () => { a.stop(); a.destroy(); }); return; }
     if (this.amb) return; const go = () => { if (!this.ambOn || this.amb) return; this.amb = this.game.sound.add('m_nature', { loop: true, volume: 0 }); this.amb.play(); this.ramp(this.amb, Save.settings.music, 900); };
     if (this.game.cache.audio.exists('m_nature')) return go();
     scene.load.audio('m_nature', 'assets/audio/music/nature.mp3'); scene.load.once('filecomplete-audio-m_nature', go); scene.load.start();
   }
+  /** Put a new song in place. If the theme is playing it changes straight away, from the top. */
+  setTheme(buffer, name) {
+    const key = `m_${THEME}`; const c = this.game.cache.audio; const live = this.want === THEME; const drop = (s) => { if (s) { clearInterval(s._ramp); s.stop(); s.destroy(); } };
+    if (live) { drop(this.cur); this.cur = null; } if (this.out && this.out.key === key) { drop(this.out); this.out = null; }
+    if (c.exists(key)) c.remove(key); c.add(key, buffer); this.theme = true; this.customName = name; this.pos = 0;
+    if (live) this.swap(THEME, 400); else if (GAMEPLAY.has(this.want)) { this.want = THEME; this.swap(THEME, 400); }
+  }
+  /** Use the player's MP3. Resolves true if it was also remembered for next time. */
+  async choose(file) { await this.loading; const p = await readPicked(this.game, file); this.setTheme(p.buffer, p.name); try { await store({ bytes: p.bytes, name: p.name }); return true; } catch { return false; } }
+  async unchoose() { const b = await builtIn(this.game); await forget(); this.setTheme(b, null); }
   swap(k, fade) {
     const old = this.cur; this.cur = null; const back = k && this.out && this.out.key === `m_${k}` ? this.out : null; if (back) this.out = null; const main = `m_${THEME}`; if (old && old.key === main) this.pos = old.seek; // the theme resumes where it stopped
     if (old) { this.out = old; this.ramp(old, 0, fade, () => { if (this.out === old) this.out = null; old.stop(); old.destroy(); }); }

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { TITLE, UI, LEVELS, FUTURE } from '../config/text.js';
+import { TITLE, UI, LEVELS, FUTURE, P_MUSIC as PM } from '../config/text.js';
 import { Save } from '../core/Save.js';
 import { Audio, SFX } from '../core/Audio.js';
 import { txt, panel, makeAnims, fadeTo, clamp, onKey } from '../core/util.js';
@@ -30,7 +30,7 @@ export class Boot extends Phaser.Scene {
 class Menu {
   constructor(scene, x, y, items, o = {}) {
     this.s = scene; this.items = items.filter(Boolean); this.i = this.items.findIndex((t) => !t.off); this.enabled = true; const gap = o.gap || 54;
-    this.rows = this.items.map((it, k) => { const p = panel(scene, x, y + k * gap, o.w || 340, 46, 'panel_btn'); const t = txt(scene, x, y + k * gap - 3, it.label, 30, it.off ? '#7a7494' : '#fff6e0', { st: 4 }); if (it.off) p.setAlpha(0.55); p.setInteractive({ useHandCursor: !it.off }); p.on('pointerover', () => { if (!it.off && this.enabled) { this.i = k; this.draw(); } }); p.on('pointerup', () => { if (this.enabled && !it.off) { this.i = k; this.draw(); this.go(); } }); return { p, t }; });
+    this.rows = this.items.map((it, k) => { const p = panel(scene, x, y + k * gap, o.w || 340, o.h || 46, 'panel_btn'); const t = txt(scene, x, y + k * gap - 3, it.label, 30, it.off ? '#7a7494' : '#fff6e0', { st: 4 }); if (it.off) p.setAlpha(0.55); p.setInteractive({ useHandCursor: !it.off }); p.on('pointerover', () => { if (!it.off && this.enabled) { this.i = k; this.draw(); } }); p.on('pointerup', () => { if (this.enabled && !it.off) { this.i = k; this.draw(); this.go(); } }); return { p, t }; });
     const kb = scene.input.keyboard; const mv = (d) => { if (!this.enabled) return; let n = this.i; for (let g = 0; g < this.items.length; g++) { n = (n + d + this.items.length) % this.items.length; if (!this.items[n].off) break; } if (n !== this.i) { this.i = n; Audio.sfx('move'); this.draw(); } };
     this.h = (e) => { if (!this.enabled || !scene.scene.isActive()) return; if (['ArrowUp', 'w', 'W'].includes(e.key)) mv(-1); else if (['ArrowDown', 's', 'S'].includes(e.key)) mv(1); else if (['ArrowLeft', 'a'].includes(e.key)) this.side(-1); else if (['ArrowRight', 'd'].includes(e.key)) this.side(1); else if (['Enter', ' ', 'x', 'j', 'z'].includes(e.key) && !e.repeat) this.go(); };
     const bound = onKey(scene, this.h); scene.events.once('shutdown', () => kb.off('keydown', bound)); this.draw();
@@ -100,9 +100,17 @@ export class Settings extends Phaser.Scene {
   init(d) { this.back = d.back; }
   create() {
     this.add.rectangle(W / 2, H / 2, W, H, 0x140e20, 0.8).setInteractive(); panel(this, W / 2, H / 2, 640, 440); txt(this, W / 2, 92, UI.settings, 48, '#fff0a0'); const S = Save.settings; const bar = (v) => `${'▮'.repeat(Math.round(v * 10))}${'▯'.repeat(10 - Math.round(v * 10))}`; const pct = (v) => `${Math.round(v * 100)}%`; void bar;
-    const lab = () => [`${UI.music}:  ◂ ${pct(S.music)} ▸`, `${UI.sfx}:  ◂ ${pct(S.sfx)} ▸`, `${UI.touch}:  ${UI[S.touch]}`, UI.full, UI.back]; const upd = () => { lab().forEach((l, i) => this.menu.label(i, l)); Audio.refresh(); Save.save(); }; const vol = (k) => (d) => { S[k] = clamp(Math.round((S[k] + d * 0.1) * 10) / 10, 0, 1); upd(); Audio.sfx('coffee'); }; const cyc = (k) => () => { S[k] = S[k] >= 0.99 ? 0 : Math.round((S[k] + 0.1) * 10) / 10; upd(); Audio.sfx('coffee'); };
-    const l = lab(); this.menu = new Menu(this, W / 2, 158, [{ label: l[0], go: cyc('music'), side: vol('music') }, { label: l[1], go: cyc('sfx'), side: vol('sfx') }, { label: l[2], go: () => { S.touch = { auto: 'on', on: 'off', off: 'auto' }[S.touch]; upd(); } }, { label: l[3], go: () => { if (this.scale.isFullscreen) this.scale.stopFullscreen(); else this.scale.startFullscreen(); } }, { label: l[4], go: () => this.close() }], { w: 480, gap: 56 }); txt(this, W / 2, 452, UI.controls, 20, '#c8bce0'); onKey(this, (e) => e.key === 'Escape' && this.close());
+    const lab = () => [`${UI.music}:  ◂ ${pct(S.music)} ▸`, `${UI.sfx}:  ◂ ${pct(S.sfx)} ▸`, `${UI.touch}:  ${UI[S.touch]}`, UI.full, short(Audio.customName ? PM.mine(Audio.customName) : PM.pick), PM.reset, UI.back]; const short = (t) => (t.length > 40 ? `${t.slice(0, 39)}…` : t); const upd = () => { lab().forEach((l, i) => this.menu.label(i, l)); Audio.refresh(); Save.save(); }; const vol = (k) => (d) => { S[k] = clamp(Math.round((S[k] + d * 0.1) * 10) / 10, 0, 1); upd(); Audio.sfx('coffee'); }; const cyc = (k) => () => { S[k] = S[k] >= 0.99 ? 0 : Math.round((S[k] + 0.1) * 10) / 10; upd(); Audio.sfx('coffee'); };
+    const l = lab(); this.menu = new Menu(this, W / 2, 138, [{ label: l[0], go: cyc('music'), side: vol('music') }, { label: l[1], go: cyc('sfx'), side: vol('sfx') }, { label: l[2], go: () => { S.touch = { auto: 'on', on: 'off', off: 'auto' }[S.touch]; upd(); } }, { label: l[3], go: () => { if (this.scale.isFullscreen) this.scale.stopFullscreen(); else this.scale.startFullscreen(); } }, { label: l[4], go: () => this.pickSong() }, { label: l[5], go: () => this.resetSong() }, { label: l[6], go: () => this.close() }], { w: 500, gap: 43, h: 40 }); this.upd = upd; this.showReset(); this.msg = txt(this, W / 2, 427, '', 22, '#8ff0c0', { wrap: 600 }); txt(this, W / 2, 458, UI.controls, 18, '#c8bce0'); onKey(this, (e) => e.key === 'Escape' && this.close());
   }
+  showReset() { const i = 5; const on = !!Audio.customName; this.menu.items[i].off = !on; const { p, t } = this.menu.rows[i]; p.setAlpha(on ? 1 : 0.4); t.setAlpha(on ? 1 : 0.4); if (!on && this.menu.i === i) this.menu.i = 4; this.menu.draw(); }
+  say(s, bad) { if (this.msg && this.msg.active) this.msg.setText(s).setColor(bad ? '#ff9a8a' : '#8ff0c0'); }
+  done(s, bad) { this.busySong = false; if (!this.sys.isActive()) return; this.upd(); this.showReset(); this.say(s, bad); }
+  pickSong() {
+    if (this.busySong) return; const el = document.createElement('input'); el.type = 'file'; el.accept = '.mp3,audio/mpeg,audio/mp3'; el.id = 'leo-song'; el.style.display = 'none'; document.getElementById('leo-song')?.remove(); document.body.appendChild(el);
+    el.onchange = () => { const f = el.files[0]; el.remove(); if (!f) return; this.busySong = true; this.say(PM.loading); Audio.choose(f).then((ok) => this.done(ok ? PM.saved : PM.unsaved, !ok), (e) => this.done(Object.values(PM).includes(e.message) ? e.message : PM.failed, true)); }; el.click();
+  }
+  resetSong() { if (this.busySong) return; this.busySong = true; this.say(PM.loading); Audio.unchoose().then(() => this.done(PM.back), () => this.done(PM.failed, true)); }
   close() { const b = this.scene.get(this.back); this.scene.stop(); if (b.menu) this.time.delayedCall(0, () => {}); setTimeout(() => { if (b.menu) b.menu.enabled = true; b.events.emit('resumeMenu'); }, 120); }
 }
 export class Pause extends Phaser.Scene {

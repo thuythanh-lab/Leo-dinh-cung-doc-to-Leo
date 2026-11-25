@@ -1,5 +1,5 @@
 import { Save } from './Save.js';
-import { THEME, GAMEPLAY, loadTheme, localSong, readPicked, store, forget } from './theme.js';
+import { THEME, GAMEPLAY, loadTheme, defaultSong, readPicked, store, forget } from './theme.js';
 
 export const MUSIC = ['menu', 'map', 'campus', 'library', 'water', 'garden', 'archive', 'tower', 'boss', 'treasury', 'office', 'boss2', 'ending', 'nature'];
 export const SFX = ['jump', 'coffee', 'special', 'hurt', 'cast', 'stomp', 'thud', 'stampno', 'stampyes', 'achieve', 'fanfare', 'secret', 'summon', 'vanish', 'checkpoint', 'splash', 'cooked', 'boing', 'rumble', 'laser', 'confetti', 'typing',
@@ -45,7 +45,7 @@ class AudioMan {
   /** Use the player's MP3. Resolves true if it was also remembered for next time. */
   async choose(file) { await this.loading; const p = await readPicked(this.game, file); this.setTheme(p.buffer, p.name); try { await store({ bytes: p.bytes, name: p.name }); navigator.storage?.persist?.().catch(() => {}); return true; } catch { return false; } }
   async unchoose() {
-    await forget(); const b = await localSong(this.game); if (b) return this.setTheme(b, null);
+    await forget(); const b = await defaultSong(this.game); if (b) return this.setTheme(b, null);
     const key = `m_${THEME}`; const live = this.want === THEME; this.theme = false; this.customName = null; this.pos = 0; this.ambient(this.askScene, false);
     if (live) { this.want = null; this.swap(null, 300); } if (this.game.cache.audio.exists(key)) this.game.cache.audio.remove(key); if (live) this.music(this.askScene, this.ask, 400);
   }

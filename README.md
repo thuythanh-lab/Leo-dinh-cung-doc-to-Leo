@@ -41,3 +41,6 @@ Finish Phase 1 to unlock level 6 on the world map. Tests: `node tests/phase2.mjs
 
 ## Final phase
 Finish Phase 2 to unlock level 7. Copy lives in `P3` in `src/config/text.js`. Art: `tools/art/phase3.py` (run after `phase2.py`). Tests: `node tests/finale.mjs`, `node tests/playthrough.mjs 7`.
+
+## Main background music
+The supplied `HGgyd.mp3` is bundled as `public/assets/audio/music/main-theme.mp3` and plays continuously across the map and normal gameplay. Bosses, menu and cinematics keep their existing music. Imported personal soundtracks still override the default; removing an import restores the bundled theme.

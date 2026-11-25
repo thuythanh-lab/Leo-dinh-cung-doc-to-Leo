@@ -1,7 +1,7 @@
 // The gameplay soundtrack: one continuous song, played exactly as recorded.
 // 1. the MP3 the player imported (kept in this browser's IndexedDB, never uploaded)
-// 2. on localhost only, the private MP3 served by vite.config.js (never bundled or published)
-// Otherwise there is no theme and the licensed level tracks play.
+// 2. the bundled main theme, available to every player
+// If the theme cannot load, the existing level tracks play.
 import { P_MUSIC } from '../config/text.js';
 export const THEME = 'theme'; // cache key m_theme
 // Every track heard during normal play (and the world map between levels). These all become one
@@ -15,16 +15,16 @@ export const stored = () => tx('readonly', (s) => s.get('custom'));
 export const store = (v) => tx('readwrite', (s) => s.put(v, 'custom'));
 export const forget = () => tx('readwrite', (s) => s.delete('custom'));
 
-/** The private file on this computer, or null everywhere else. */
-export async function localSong(game) {
-  if (!game.sound.context || !['localhost', '127.0.0.1'].includes(location.hostname)) return null;
-  try { const r = await fetch('local-music/main-theme'); if (!r.ok || !/audio/.test(r.headers.get('content-type') || '')) return null; return await game.sound.context.decodeAudioData(await r.arrayBuffer()); } catch { return null; }
+/** The published default soundtrack, or null if unavailable. */
+export async function defaultSong(game) {
+  if (!game.sound.context) return null;
+  try { const r = await fetch('assets/audio/music/main-theme.mp3'); if (!r.ok || !/audio/.test(r.headers.get('content-type') || '')) return null; return await game.sound.context.decodeAudioData(await r.arrayBuffer()); } catch { return null; }
 }
 /** {buffer, name} or null for "use the licensed tracks". name is set only for an imported MP3. */
 export async function loadTheme(game) {
   if (!game.sound.context) return null;
   try { const c = await stored(); if (c && c.bytes) return { buffer: await game.sound.context.decodeAudioData(c.bytes.slice(0)), name: c.name }; } catch { /* storage blocked or damaged */ }
-  const buffer = await localSong(game); return buffer && { buffer, name: null };
+  const buffer = await defaultSong(game); return buffer && { buffer, name: null };
 }
 /** Validate a picked file. Throws an Error whose message can be shown. */
 export async function readPicked(game, file) {

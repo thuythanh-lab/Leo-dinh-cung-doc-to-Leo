@@ -19,9 +19,8 @@ Pack licence texts are in `public/assets/licenses/`. To rebuild assets, set `LEO
 ## Phase 2
 New art is original, drawn by `tools/art/phase2.py` and appended to the atlas; Phase 1 atlas pixels are unchanged. Music and sound effects reuse the existing tracks and the Kenney RPG Audio and Interface Sounds packs. Nothing was downloaded. `tools/art/build.py` rewrites the atlas, so run `phase2.py` after it.
 
-## Local-only audio (not redistributed)
-`assets/audio/Harry Potter Hedwig s Song HQ.mp3`: redistribution rights not confirmed. Git-ignored, never copied to `dist`, served only by the local Vite servers. Public default: the licensed level tracks.
-
+## Main background music
+`public/assets/audio/music/main-theme.mp3`: supplied by the repository owner as `HGgyd.mp3`, copied without re-encoding. File metadata identifies it as "Harry Potter - Hedwig's Song HQ" (artist field: Bainillla). Used as the default map and gameplay soundtrack. No licence grant is asserted by this manifest.
 
 ## Final phase
 Original art from `tools/art/phase3.py`, appended to the atlas. No new audio.

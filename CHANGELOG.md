@@ -2,6 +2,11 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V2.2 - One gameplay soundtrack (local)
+- Locally, the local MP3 replaces every level track and the world map theme as one continuous song; it survives level changes, deaths and respawns, and resumes after bosses and cinematics
+- Title, cinematic and boss music and all sound effects unchanged; crisis room ambience plays underneath
+- Public site unchanged: licensed level tracks, MP3 not published
+
 ## V2.1 - Local main theme
 - On this computer only, the world map theme (also the conference break) can be replaced by a local MP3 with a blended loop; it resumes instead of restarting
 - The MP3 is not published: redistribution rights are not confirmed, so the public site keeps the licensed track

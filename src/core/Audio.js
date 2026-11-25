@@ -1,5 +1,5 @@
 import { Save } from './Save.js';
-import { MAIN_THEME, loadLocalTheme } from './localTheme.js';
+import { THEME, GAMEPLAY, loadLocalTheme } from './localTheme.js';
 
 export const MUSIC = ['menu', 'map', 'campus', 'library', 'water', 'garden', 'archive', 'tower', 'boss', 'treasury', 'office', 'boss2', 'ending', 'nature'];
 export const SFX = ['jump', 'coffee', 'special', 'hurt', 'cast', 'stomp', 'thud', 'stampno', 'stampyes', 'achieve', 'fanfare', 'secret', 'summon', 'vanish', 'checkpoint', 'splash', 'cooked', 'boing', 'rumble', 'laser', 'confetti', 'typing',
@@ -15,18 +15,31 @@ class AudioMan {
     this.game.sound.play(`s_${k}`, { volume: Save.settings.sfx * (GAIN[k] ?? 0.85) * (o.v ?? 1), rate: o.rate ?? 1 });
   }
   music(scene, k, fade = 900) {
+    this.ask = k;
+    if (GAMEPLAY.has(k)) {
+      if (!this.localReady) { this.local.then(() => { if (this.ask === k && scene.sys.isActive()) this.music(scene, k, fade); }); return; }
+      if (this.localTheme) { this.ambient(scene, k === 'nature'); k = THEME; }
+    } else this.ambient(scene, false);
     if (this.want === k) return; this.want = k;
     const start = () => { if (this.want === k) this.swap(k, fade); };
     if (!k) return this.swap(null, fade);
-    if (k === MAIN_THEME && !this.localReady) { this.local.then(() => { if (this.want === k) { this.want = null; if (scene.sys.isActive()) this.music(scene, k, fade); } }); return; }
     if (this.game.cache.audio.exists(`m_${k}`)) return start();
     scene.load.audio(`m_${k}`, `assets/audio/music/${k}.mp3`); scene.load.once(`filecomplete-audio-m_${k}`, start); scene.load.start();
     scene.events.once('shutdown', () => { if (this.want === k && !(this.cur && this.cur.key === `m_${k}`) && !this.game.cache.audio.exists(`m_${k}`)) this.want = null; }); // left before it loaded: let the next scene ask again
   }
+  /** Wind and birds under the local theme (Emergency Existential Crisis Room). */
+  ambient(scene, on) {
+    this.ambOn = on; if (!on) { const a = this.amb; this.amb = null; if (a) this.ramp(a, 0, 600, () => { a.stop(); a.destroy(); }); return; }
+    if (this.amb) return; const go = () => { if (!this.ambOn || this.amb) return; this.amb = this.game.sound.add('m_nature', { loop: true, volume: 0 }); this.amb.play(); this.ramp(this.amb, Save.settings.music, 900); };
+    if (this.game.cache.audio.exists('m_nature')) return go();
+    scene.load.audio('m_nature', 'assets/audio/music/nature.mp3'); scene.load.once('filecomplete-audio-m_nature', go); scene.load.start();
+  }
   swap(k, fade) {
-    const old = this.cur; this.cur = null; const main = `m_${MAIN_THEME}`; if (old && old.key === main) this.pos = old.seek; // the main theme resumes where it stopped
-    if (old) this.ramp(old, 0, fade, () => { old.stop(); old.destroy(); });
-    if (k) { const s = this.game.sound.add(`m_${k}`, { loop: true, volume: 0 }); s.play({ loop: true, volume: 0, seek: s.key === main ? this.pos : 0 }); this.cur = s; this.ramp(s, Save.settings.music, fade); }
+    const old = this.cur; this.cur = null; const back = k && this.out && this.out.key === `m_${k}` ? this.out : null; if (back) this.out = null; const main = `m_${THEME}`; if (old && old.key === main) this.pos = old.seek; // the theme resumes where it stopped
+    if (old) { this.out = old; this.ramp(old, 0, fade, () => { if (this.out === old) this.out = null; old.stop(); old.destroy(); }); }
+    if (!k) return;
+    if (back) { this.cur = back; this.ramp(this.cur, Save.settings.music, fade); return; } // still fading out: bring the same copy back
+    const s = this.game.sound.add(`m_${k}`, { loop: true, volume: 0 }); s.play({ loop: true, volume: 0, seek: s.key === main ? this.pos : 0 }); this.cur = s; this.ramp(s, Save.settings.music, fade);
   }
   ramp(s, to, ms, done) {
     const from = s.volume; const t0 = performance.now(); clearInterval(s._ramp);
@@ -37,6 +50,6 @@ class AudioMan {
     }, 40);
   }
   duck(on) { if (this.cur) this.ramp(this.cur, Save.settings.music * (on ? 0.25 : 1), 250); }
-  refresh() { if (this.cur) { clearInterval(this.cur._ramp); this.cur.setVolume(Save.settings.music); } }
+  refresh() { if (this.amb) { clearInterval(this.amb._ramp); this.amb.setVolume(Save.settings.music); } if (this.cur) { clearInterval(this.cur._ramp); this.cur.setVolume(Save.settings.music); } }
 }
 export const Audio = new AudioMan();

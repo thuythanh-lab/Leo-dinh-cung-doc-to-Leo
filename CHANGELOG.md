@@ -2,6 +2,11 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V0.3 - University campus and Research Assistant
+- Level 1 complete
+- Research Assistant: 10 s active, 30 s cooldown
+- Secret: Emergency Existential Crisis Room
+
 ## V0.2 - Léo character and platforming mechanics
 - Léo with 17 animations
 - Run, jump, slide, climb, swim, magic pen

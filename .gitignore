@@ -1,0 +1,9 @@
+node_modules/
+dist/
+tests/shots/
+# source asset library: untouched originals, too large for git
+/assets/
+*.log
+__pycache__/
+.claude/
+/packs/

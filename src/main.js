@@ -1,9 +1,21 @@
 import Phaser from 'phaser';
 import '@fontsource/vt323/400.css';
+import '@fontsource/handjet/700.css';
 import './style.css';
+import { VIEW } from './config/balance.js';
+import LevelScene from './scenes/LevelScene.js';
+import HUD from './scenes/HUD.js';
+import { Boot, Title, TitleUI, Map_, Settings, Pause } from './scenes/menus.js';
 
-class Preview extends Phaser.Scene {
-  preload() { this.load.image('map', 'assets/art/worldmap.png'); }
-  create() { this.add.image(0, 0, 'map').setOrigin(0, 0).setScale(2); }
-}
-new Phaser.Game({ parent: 'game', width: 960, height: 540, pixelArt: true, scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }, scene: Preview });
+class CV extends Phaser.Scene { constructor() { super('CV'); } create(d) { this.scene.start('Map'); } }
+class Intro extends Phaser.Scene { constructor() { super('Intro'); } create() { this.scene.start('Level', { level: 1 }); } }
+class Ending extends Phaser.Scene { constructor() { super('Ending'); } create() { this.scene.start('Map'); } }
+const game = new Phaser.Game({
+  type: Phaser.AUTO, parent: 'game', width: VIEW.width, height: VIEW.height, backgroundColor: '#140e20', pixelArt: true, roundPixels: true,
+  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, fullscreenTarget: 'game' },
+  physics: { default: 'arcade', arcade: { gravity: { y: 0 }, tileBias: 16, fixedStep: false, customUpdate: true } },
+  input: { activePointers: 4 }, loader: { maxRetries: 5 }, audio: { disableWebAudio: false },
+  scene: [Boot, Title, TitleUI, Intro, Map_, LevelScene, HUD, CV, Settings, Pause, Ending],
+});
+window.__game = game;
+if (location.search.includes('debug')) import('./core/Input.js').then((m) => { window.__C = m.Controls; });

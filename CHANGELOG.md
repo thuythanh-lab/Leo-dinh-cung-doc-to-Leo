@@ -2,6 +2,9 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V0.9 - Cinematics, audio and visual polish
+- Opening and Phase 1 ending cinematics
+
 ## V0.8 - Academic CV and achievement system
 - Academic CV notebook with 14 entries
 

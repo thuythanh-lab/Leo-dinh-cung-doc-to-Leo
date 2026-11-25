@@ -1,6 +1,6 @@
 import { T } from '../core/util.js';
 
-export const THEMES = ['campus', 'library', 'water', 'garden', 'archive', 'tower', 'treasury', 'office'];
+export const THEMES = ['campus', 'library', 'water', 'garden', 'archive', 'tower', 'treasury', 'office', 'field', 'manuscript'];
 const PER = 80; const SP = 64; // special row starts at index 64
 
 /** Tile-space level authoring. Symbols: # solid, - one-way, = bridge, B breakable, K book block, H ladder, ^ hazard */
@@ -40,7 +40,7 @@ export default class Builder {
         if (c === '#') {
           const m = (S(x, y - 1) ? 1 : 0) | (S(x + 1, y) ? 2 : 0) | (S(x, y + 1) ? 4 : 0) | (S(x - 1, y) ? 8 : 0);
           layer.putTileAt(base + m + 16 * ((x % 2) + 2 * (y % 2)), x, y);
-          if (!S(x, y - 1) && this.get(x, y - 1) === '.' && !this.decorSkip.has(`${x}`) && (x * 7919 + y * 104729) % 100 < (['campus', 'garden'].includes(THEMES[base / PER]) ? 40 : 10)) deco.putTileAt(base + SP + 10 + ((x * 31 + y * 17) % 4), x, y - 1);
+          if (!S(x, y - 1) && this.get(x, y - 1) === '.' && !this.decorSkip.has(`${x}`) && (x * 7919 + y * 104729) % 100 < (['campus', 'garden', 'field'].includes(THEMES[base / PER]) ? 40 : 10)) deco.putTileAt(base + SP + 10 + ((x * 31 + y * 17) % 4), x, y - 1);
         } else if (c === '-') { const l = this.get(x - 1, y) === '-'; const r = this.get(x + 1, y) === '-'; layer.putTileAt(base + SP + (l && r ? 1 : l ? 2 : r ? 0 : 3), x, y); } else if (c === '=') layer.putTileAt(base + SP + 14, x, y);
         else if (c === 'B') layer.putTileAt(base + SP + 8, x, y);
         else if (c === 'K') layer.putTileAt(base + SP + 9, x, y);

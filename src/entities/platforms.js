@@ -109,12 +109,12 @@ export class Raft extends Plat {
 
 /** Rideable mechanical beetle: waits, then shuttles along its path. */
 export class Beetle extends Plat {
-  constructor(L, tx, ty, o) { super(L, tx, ty, 'beetle', { bh: 20 }); this.body.setSize(50, 18, false); this.body.setOffset(6, 6); this.o = o; this.awake = false; this.dir = 1; this.wait = 0; this.setDepth(9); }
-  wake() { if (this.awake) return; this.awake = true; this.wait = 900; this.play('beetle'); Audio.sfx('boing'); this.L.fx.ring(this.x, this.y, 0x8ff0c0, 1.6); }
+  constructor(L, tx, ty, o) { super(L, tx, ty, o.name || 'beetle', { bh: 20 }); this.body.setSize(50, 18, false); this.body.setOffset(6, o.oy ?? 6); this.o = o; this.awake = false; this.dir = 1; this.wait = 0; this.setDepth(9); }
+  wake() { if (this.awake) return; this.awake = true; this.wait = 900; this.play(this.name2); Audio.sfx('boing'); this.L.fx.ring(this.x, this.y, 0x8ff0c0, 1.6); }
   update(dt) {
     if (!this.awake) { this.body.setVelocity(0, 0); this.rider = false; return; }
-    if (this.wait > 0) { this.wait -= dt; this.body.setVelocity(0, 0); if (this.wait <= 0) this.play('beetle', true); } else {
-      this.body.setVelocity(this.dir * 52, 0); const a = this.hx; const b = this.hx + this.o.dist * T;
+    if (this.wait > 0) { this.wait -= dt; this.body.setVelocity(0, 0); if (this.wait <= 0) this.play(this.name2, true); } else {
+      this.body.setVelocity(this.dir * (this.o.speed || 52), 0); const a = this.hx; const b = this.hx + this.o.dist * T;
       if ((this.dir > 0 && this.x >= b) || (this.dir < 0 && this.x <= a)) { if (this.dir > 0 && this.o.onEnd) this.o.onEnd(); this.dir *= -1; this.wait = 1600; this.setFlipX(this.dir < 0); this.anims.pause(); this.body.setVelocity(0, 0); }
     }
     this.rider = false;

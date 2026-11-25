@@ -22,7 +22,7 @@ export default class Fx {
   ring(x, y, color = 0xffffff, to = 3) { const r = this.L.add.image(x, y, 'atlas', 'ring/0').setDepth(29).setTint(color).setScale(0.2).setBlendMode('ADD'); this.L.tweens.add({ targets: r, scale: to, alpha: 0, duration: 520, ease: 'Quad.out', onComplete: () => r.destroy() }); }
   glow(x, y, kind = 'w', scale = 1, depth = 7, alpha = 0.5) { return this.L.add.image(x, y, 'atlas', `glow_${kind}/0`).setBlendMode('ADD').setDepth(depth).setScale(scale).setAlpha(alpha); }
   ambient(theme, zone) {
-    const c = { campus: ['leaf', 0.5], garden: ['petal', 0.8], library: ['mote', 0.7], water: ['mote', 0.6], archive: ['mote', 0.5], tower: ['bit', 0.5], treasury: ['mote', 0.8], office: ['bit', 0.6] }[theme]; if (!c) return null;
+    const c = { campus: ['leaf', 0.5], garden: ['petal', 0.8], library: ['mote', 0.7], water: ['mote', 0.6], archive: ['mote', 0.5], tower: ['bit', 0.5], treasury: ['mote', 0.8], office: ['bit', 0.6], field: ['leaf', 0.4], manuscript: ['bit', 0.7] }[theme]; if (!c) return null;
     const mote = c[0] === 'mote';
     const e = this.L.add.particles(0, 0, 'atlas', { frame: this.frames(c[0]), x: { min: 220, max: 760 }, y: mote ? { min: 135, max: 415 } : 127, lifespan: 6500, speedX: mote ? { min: -8, max: 8 } : { min: -30, max: -8 }, speedY: mote ? { min: -12, max: -3 } : { min: 14, max: 30 }, rotate: mote ? 0 : { min: 0, max: 360 }, alpha: mote ? { start: 0.75, end: 0 } : { start: 0.9, end: 0.2 }, scale: { min: 0.6, max: 1 }, frequency: 420 / c[1], blendMode: mote ? 'ADD' : 'NORMAL' }).setScrollFactor(0).setDepth(zone?.front ? 26 : 3);
     return e;

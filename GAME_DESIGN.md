@@ -27,3 +27,6 @@ Secrets: the Emergency Existential Crisis Room (L1), the Research Rabbit Hole (L
 - **Phase 3, The Đốc Tờ Era:** "Not bad", Reviewer #2, the defence, the summit and the finale.
 
 Hooks: `src/core/future.js`, reserved save slots in `Save.d.future`, append-only achievement list, obstacle base classes in `src/entities/things.js`.
+
+## Phase 2: The Fieldwork Survival Era (level 6)
+One map, two zones. Field: five optional research findings, a flood that raises rafts, a landslide (assistant, pen or jump over), a rideable buffalo, and a rope bridge that collapses onto a lower route. Dissertation: five chapter pages, a stress cloud, a cursor that needs the inspiration bulb, and two supervisor stamps that destroy the path and open another. Missing findings or chapters never block the ending. All copy is in `P2` in `src/config/text.js`.

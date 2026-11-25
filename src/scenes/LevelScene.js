@@ -123,7 +123,7 @@ export default class LevelScene extends Phaser.Scene {
     if (this.amb) this.amb.destroy(); this.amb = this.fx.ambient(z.theme, z);
     if (z.shade) { if (!this.shade) this.shade = this.add.rectangle(480, 270, 500, 300, 0, 0).setScrollFactor(0).setDepth(25); this.shade.setFillStyle(z.shade[0], z.shade[1]); } else if (this.shade) this.shade.setFillStyle(0, 0);
     if (z.music !== undefined) Audio.music(this, z.music, instant ? 500 : 900);
-    z.onEnter && z.onEnter();
+    this.hud.refresh(); z.onEnter && z.onEnter();
   }
   teleport(tx, ty, done, ms = 260) {
     if (this.teleporting) return; this.teleporting = true; const p = this.player; p.locked = true; const cam = this.cameras.main; cam.fadeOut(ms, 20, 14, 30);
@@ -166,7 +166,7 @@ export default class LevelScene extends Phaser.Scene {
   celebrate() { this.player.forceAnim = 'leo_celebrate'; this.player.body.setVelocityX(0); }
   finish(extra) {
     if (this.finished) return; this.finished = 1; this.lock(true); this.celebrate(); this.fx.rain(2600); Audio.sfx('fanfare'); if (!this.tookDamage) this.unlock('productive'); Save.complete(this.levelId); const id = this.levelId;
-    this.wait(600, () => this.hud.complete(!this.run.flags.hurt, () => { Save.d.mapAt = Math.min(5, id + 1); if (id === 5) { Save.d.mapAt = 5; Save.save(); this.leave('Ending'); } else { Save.save(); this.leave('Map', { from: id }); } })); extra && extra();
+    this.wait(600, () => this.hud.complete(!this.run.flags.hurt, () => { Save.d.mapAt = Math.min(5, id + 1); if (id >= 5) { Save.d.mapAt = id; Save.save(); this.leave(id === 5 ? 'Ending' : 'Ending2'); } else { Save.save(); this.leave('Map', { from: id }); } })); extra && extra();
   }
   leave(key, data) { if (this._leaving) return; this._leaving = true; this.cameras.main.fadeOut(500, 20, 14, 30); this.time.delayedCall(540, () => { this.scene.stop('HUD'); this.scene.start(key, data); }); }
 }

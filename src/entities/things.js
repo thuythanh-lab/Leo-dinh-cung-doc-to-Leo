@@ -164,7 +164,7 @@ export class Format extends Enemy {
   update(dt) { if (this.dead) return; this.t -= dt; const b = this.body; if (b.blocked.down) { b.setVelocityX(0); if (this.t <= 0) { this.t = 1500; let d = this.L.player.x < this.x ? -1 : 1; if (!this.L.solidAt(this.x + d * 34, this.y + 6, true)) d *= -1; if (this.L.solidAt(this.x + d * 34, this.y + 6, true)) { b.setVelocity(d * 62, -230); this.setFlipX(d < 0); } } } this.touch(); }
 }
 export class Citation extends Enemy {
-  constructor(L, tx, ty, o = {}) { super(L, tx, ty, 'citation', o); this.body.setSize(18, 16).setOffset(7, 5); this.t = tx; }
+  constructor(L, tx, ty, o = {}) { super(L, tx, ty, o.sprite || 'citation', o); this.body.setSize(18, 16).setOffset(7, 5); this.t = tx; }
   update(dt) { if (this.dead) return; this.t += dt / 1000; this.x = this.sx + Math.sin(this.t * 1.1) * (this.o.range ?? 36); this.y = this.sy + Math.sin(this.t * 2.3) * 12; this.setFlipX(Math.cos(this.t * 1.1) < 0); this.touch(); }
 }
 export class Tracked extends Enemy {

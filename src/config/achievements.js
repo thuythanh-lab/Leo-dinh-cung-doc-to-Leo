@@ -7,6 +7,8 @@ export const ACHIEVEMENTS = [
   { id: 'q1', icon: 'q1', main: true, title: 'Q1 Publication', head: 'Q1 PUBLICATION', sub: 'Academic weapon behaviour.', note: 'Léo (et al.). Accepted after 3 rounds and 1 machine.' },
   { id: 'fund', icon: 'fund', main: true, title: 'Research Funding Secured', head: 'RESEARCH FUNDING SECURED', sub: 'Financially un-cooked.', note: 'Budget line: no longer vibes.' },
   { id: 'letter', icon: 'letter', main: true, title: 'Official Fieldwork Letter Acquired', head: 'OFFICIAL FIELDWORK LETTER ACQUIRED', sub: 'Bureaucracy final boss defeated.', note: 'Công văn đã được duyệt.' },
+  { id: 'fieldwork', icon: 'fieldwork', main: true, title: 'Fieldwork Completed', head: 'FIELDWORK COMPLETED', sub: 'Touched grass. For research purposes.', note: 'n = several. The goat withdrew consent.' },
+  { id: 'chapters', icon: 'chapters', main: true, title: 'All Chapters Completed', head: 'ALL CHAPTERS COMPLETED', sub: 'HE ACTUALLY COOKED.', note: 'File: thesis_final_FINAL_v27_USE_THIS_ONE.' },
   { id: 'delegator', icon: 'delegator', title: 'Professional Delegator', sub: 'Summoned the assistant three times.', hint: 'Delegate. Then delegate again.' },
   { id: 'caffeine', icon: 'caffeine', title: 'Caffeine Is a Methodology', sub: 'Collected 30 coffee cups.', hint: 'n = 30 cups.' },
   { id: 'rabbit', icon: 'rabbit', title: 'Research Rabbit Hole', sub: 'Found a hidden library. Lost an afternoon.', hint: 'Some books are hiding more books.' },
@@ -16,4 +18,4 @@ export const ACHIEVEMENTS = [
   { id: 'buffet', icon: 'buffet', title: 'Conference Survival Skills', sub: 'Networking is temporary. Free food is forever.', hint: 'Follow the smell of free food.' },
 ];
 export const byId = Object.fromEntries(ACHIEVEMENTS.map((a) => [a.id, a]));
-export const FUTURE_SLOTS = 4;
+export const FUTURE_SLOTS = 3;

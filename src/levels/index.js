@@ -3,5 +3,6 @@ import l2 from './level2.js';
 import l3 from './level3.js';
 import l4 from './level4.js';
 import l5 from './level5.js';
+import l6 from './level6.js';
 
-export const LEVEL_DEFS = { 1: l1, 2: l2, 3: l3, 4: l4, 5: l5 };
+export const LEVEL_DEFS = { 1: l1, 2: l2, 3: l3, 4: l4, 5: l5, 6: l6 };

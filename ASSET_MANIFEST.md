@@ -15,3 +15,6 @@ Source packs are read by the tools, never modified. Only the processed output in
 Reviewed but not used: Kenney Tiny Town and Tiny Dungeon (top-down), Tiny Pixel Fantasy Character Generator (too small for recognisable glasses and hair). Kenney Pixel Platformer was not available locally and was not needed.
 
 Pack licence texts are in `public/assets/licenses/`. To rebuild assets, set `LEO_PACKS` to the folder holding the extracted packs.
+
+## Phase 2
+New art is original, drawn by `tools/art/phase2.py` and appended to the atlas; Phase 1 atlas pixels are unchanged. Music and sound effects reuse the existing tracks and the Kenney RPG Audio and Interface Sounds packs. Nothing was downloaded. `tools/art/build.py` rewrites the atlas, so run `phase2.py` after it.

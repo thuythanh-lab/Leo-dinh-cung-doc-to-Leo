@@ -2,6 +2,15 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V2.0 - Phase 2: The Fieldwork Survival Era
+- Level 6: Into the Field and The Dissertation Era, joined by a portal
+- Flooding river, landslide, water buffalo, collapsing rope bridge with a lower detour
+- Stress cloud, Writer's Block cursor, Supervisor Feedback stamps
+- Fieldwork Completed and All Chapters Completed achievements
+- Phase 2 ending with the ridge zoom-out; world map and CV extended
+- Existing saves keep everything; Phase 1 finishers unlock level 6
+- Backdrop widened by 10 px each side so screen shake no longer shows the edge
+
 ## V1.0 - Phase 1 complete and tested
 - Verified on the live GitHub Pages URL; GitHub Actions publishes to gh-pages
 - Share metadata, final test report

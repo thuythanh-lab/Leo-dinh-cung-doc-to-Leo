@@ -18,7 +18,7 @@ export default class HUD extends Phaser.Scene {
     this.hearts = [0, 1, 2].map((i) => this.add.sprite(34 + i * 42, 34, 'atlas', 'heart/0').setScale(3));
     this.cup = this.add.sprite(34, 78, 'atlas', 'hud_coffee/0').setScale(2); this.cupT = txt(this, 56, 76, '0', 28, '#fff6e0', { ox: 0 });
     this.raIcon = this.add.sprite(190, 48, 'atlas', 'hud_ra/0').setScale(2.2); this.raG = this.add.graphics(); this.raT = txt(this, 190, 94, '', 22, '#c8ffd8'); this.raKey = txt(this, 214, 70, 'E', 20, '#fff0a0');
-    this.itemIcons = this.L.hudItems.map(([f, n], i) => ({ f, s: this.add.sprite(W / 2 - (this.L.hudItems.length - 1) * 26 + i * 52, 34, 'atlas', `${n}/0`).setScale(1.7) }));
+    this.itemIcons = this.L.hudItems.map(([f, n, zone], j, all) => { const g = all.filter((q) => q[2] === zone); const i = g.findIndex((q) => q[0] === f); return { f, zone, s: this.add.sprite(W / 2 - (g.length - 1) * 26 + i * 52, 34, 'atlas', `${n}/0`).setScale(1.7) }; });
     this.promptT = txt(this, 0, 0, '', 24, '#fff0a0').setVisible(false);
     this.bang = this.add.sprite(0, 0, 'atlas', 'arrowdn/0').setScale(2).setVisible(false);
     this.makeTouch(); this.makeTop(); this.refresh();
@@ -32,7 +32,7 @@ export default class HUD extends Phaser.Scene {
   refresh() {
     if (!this.ready || !this.hearts || !this.L.player) return; const h = this.L.player.hearts; this.hearts.forEach((s, i) => { const f = `heart/${i < h ? 0 : 1}`; if (s.frame.name !== f) { s.setFrame(f); this.tweens.add({ targets: s, scale: { from: 4.2, to: 3 }, duration: 220 }); } });
     const c = `${Save.d.stats.coffee}`; if (this.cupT.text !== c) { this.cupT.setText(c); this.tweens.add({ targets: this.cup, scale: { from: 2.6, to: 2 }, duration: 160 }); }
-    const ra = Save.d.assistant; [this.raIcon, this.raT].forEach((o) => o.setVisible(ra)); this.raKey.setVisible(ra && !this.touchOn); this.itemIcons.forEach(({ f, s }) => { const on = this.L.flag(f); if (on && s.tintTopLeft !== 0xffffff) this.tweens.add({ targets: s, scale: { from: 2.6, to: 1.7 }, duration: 300 }); on ? s.clearTint().setAlpha(1) : s.setTintFill(0xd8d0f0).setAlpha(0.28); });
+    const ra = Save.d.assistant; [this.raIcon, this.raT].forEach((o) => o.setVisible(ra)); this.raKey.setVisible(ra && !this.touchOn); this.itemIcons.forEach(({ f, s, zone }) => { if (zone) s.setVisible(this.L.zone?.id === zone); const on = this.L.flag(f); if (on && s.tintTopLeft !== 0xffffff) this.tweens.add({ targets: s, scale: { from: 2.6, to: 1.7 }, duration: 300 }); on ? s.clearTint().setAlpha(1) : s.setTintFill(0xd8d0f0).setAlpha(0.28); });
     if (this.btn && this.btn.assist) this.btn.assist.setVisible(ra && this.touchOn);
   }
   tick() {

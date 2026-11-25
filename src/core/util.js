@@ -34,9 +34,9 @@ export function panel(scene, x, y, w, h, kind = 'panel_dark') {
 /** Register every multi-frame atlas entry as an animation of the same name. */
 export function makeAnims(scene) {
   const counts = scene.cache.json.get('atlasmeta').meta.counts;
-  const fps = { coffee: 6, special: 7, machine: 5, waterfall: 12, watertop: 6, fountain: 9, portal: 9, miniportal: 10, gremlin: 8, citation: 9, tracked: 12, format: 5, letter: 10, stress: 4, conveyor: 12, beetle: 7, writers: 2, sigil: 8, page: 7, framework: 6, spark: 14, dust: 14, coin: 12, bird: 7, boss_machine: 8, b_torch: 7, b_moth: 6 };
+  const fps = { coffee: 6, special: 7, machine: 5, waterfall: 12, watertop: 6, fountain: 9, portal: 9, miniportal: 10, gremlin: 8, citation: 9, tracked: 12, format: 5, letter: 10, stress: 4, conveyor: 12, beetle: 7, writers: 2, sigil: 8, page: 7, framework: 6, spark: 14, dust: 14, coin: 12, bird: 7, boss_machine: 8, b_torch: 7, b_moth: 6, buffalo: 6, goat: 3, chicken: 6, mosquito: 14, finding: 5, bulb: 6, cursor: 2 };
   for (const [n, c] of Object.entries(counts)) {
-    if (c < 2 || scene.anims.exists(n)) continue;
+    if (c < 2 || n === 'word' || scene.anims.exists(n)) continue;
     let end = c - 1; let start = 0;
     if (n === 'boss_machine') end = 3;
     if (n === 'boss_stamp') end = 1;
@@ -54,7 +54,7 @@ export function makeAnims(scene) {
 
 /** Drifting parallax rig for a theme. Returns {update, destroy}. */
 export function backdrop(scene, theme, depth = -100) {
-  const cx0 = scene.cameras.main.width / 2; const cy0 = scene.cameras.main.height / 2; const w = 500;
+  const cx0 = scene.cameras.main.width / 2; const cy0 = scene.cameras.main.height / 2; const w = 520;
   const has = (k) => scene.textures.exists(`bg_${theme}_${k}`);
   const z = []; const sky = scene.add.image(cx0, cy0, `bg_${theme}_sky`).setScrollFactor(0).setDepth(depth).setDisplaySize(w, 300);
   z.push(sky);

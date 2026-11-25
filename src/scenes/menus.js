@@ -7,7 +7,7 @@ import { THEMES } from '../levels/Builder.js';
 import { LEVEL_DEFS } from '../levels/index.js';
 
 const W = 960; const H = 540;
-const THEMES_BG = ['campus', 'library', 'water', 'garden', 'archive', 'tower', 'treasury', 'office', 'sunset'];
+const THEMES_BG = ['campus', 'library', 'water', 'garden', 'archive', 'tower', 'treasury', 'office', 'sunset', 'field', 'manuscript'];
 
 // ------------------------------------------------------------------ boot
 export class Boot extends Phaser.Scene {
@@ -16,8 +16,8 @@ export class Boot extends Phaser.Scene {
     const t = this.add.text(W / 2, H / 2, 'Brewing coffee...', { fontFamily: 'VT323, monospace', fontSize: '30px', color: '#fff0c0' }).setOrigin(0.5); this.load.on('progress', (p) => t.setText(`Brewing coffee... ${Math.round(p * 100)}%`));
     const A = 'assets/art/'; this.load.atlas('atlas', `${A}atlas.png`, `${A}atlas.json`); this.load.json('atlasmeta', `${A}atlas.json`); this.load.json('leoSheet', 'assets/characters/leo.json'); this.load.spritesheet('leo', 'assets/characters/leo.png', { frameWidth: 32, frameHeight: 36 });
     THEMES.forEach((n) => this.load.image(`tiles_${n}`, `${A}tiles_${n}.png`));
-    const layers = { campus: ['sky', 'far', 'clouds', 'mid', 'near'], tower: ['sky', 'far', 'clouds', 'mid', 'near'], sunset: ['sky', 'far', 'clouds', 'mid', 'near'] }; THEMES_BG.forEach((n) => (layers[n] || ['sky', 'far', 'mid', 'near']).forEach((l) => this.load.image(`bg_${n}_${l}`, `${A}bg_${n}_${l}.png`)));
-    ['title_mountain', 'title_town', 'worldmap', 'notebook', 'clouds_big', 'fieldscape'].forEach((n) => this.load.image(n, `${A}${n}.png`)); SFX.forEach((s) => this.load.audio(`s_${s}`, `assets/audio/sfx/${s}.mp3`)); this.load.audio('m_menu', 'assets/audio/music/menu.mp3');
+    const layers = { campus: ['sky', 'far', 'clouds', 'mid', 'near'], tower: ['sky', 'far', 'clouds', 'mid', 'near'], field: ['sky', 'far', 'clouds', 'mid', 'near'], sunset: ['sky', 'far', 'clouds', 'mid', 'near'] }; THEMES_BG.forEach((n) => (layers[n] || ['sky', 'far', 'mid', 'near']).forEach((l) => this.load.image(`bg_${n}_${l}`, `${A}bg_${n}_${l}.png`)));
+    ['title_mountain', 'title_town', 'worldmap', 'notebook', 'clouds_big', 'fieldscape', 'vista'].forEach((n) => this.load.image(n, `${A}${n}.png`)); SFX.forEach((s) => this.load.audio(`s_${s}`, `assets/audio/sfx/${s}.mp3`)); this.load.audio('m_menu', 'assets/audio/music/menu.mp3');
   }
   async create() {
     makeAnims(this); Audio.init(this.game);
@@ -71,25 +71,25 @@ export class TitleUI extends Phaser.Scene {
 }
 
 // ------------------------------------------------------------------ world map
-const NODES = [[58, 226], [136, 196], [212, 208], [278, 164], [352, 146]]; const FN = [[428, 112], [446, 54]];
+const NODES = [[58, 226], [136, 196], [212, 208], [278, 164], [352, 146], [428, 112]]; const FN = [[446, 54]]; const LAST = NODES.length; // last playable level
 export class Map_ extends Phaser.Scene {
   constructor() { super('Map'); }
   init(d) { this.from = d && d.from; }
   create() {
     this._leaving = false; Audio.music(this, 'map'); this.add.image(0, 0, 'worldmap').setOrigin(0, 0).setScale(2); this.clouds = this.add.tileSprite(W / 2, 60, W, 260, 'clouds_big').setAlpha(0.55).setTileScale(2); this.add.tileSprite(W / 2, 10, W, 120, 'clouds_big').setTileScale(2).setAlpha(0.95);
     const S = (p) => [p[0] * 2, p[1] * 2]; this.S = S; this.nodes = NODES.map((p, i) => { const [x, y] = S(p); const id = i + 1; const st = Save.d.done[id] ? 'node_done' : id <= Save.d.unlocked ? 'node_open' : 'node_lock'; const n = this.add.sprite(x, y, 'atlas', `${st}/0`).setScale(2).setInteractive({ useHandCursor: true }); n.on('pointerup', () => this.pickNode(i)); if (Save.d.done[id]) this.add.sprite(x + 18, y - 4, 'atlas', 'flag/0').setScale(1.6).setOrigin(0.2, 1); if (st === 'node_open') this.tweens.add({ targets: n, scale: 2.2, yoyo: true, repeat: -1, duration: 600 }); return n; });
-    FN.forEach((p, i) => { const [x, y] = S(p); const n = this.add.sprite(x, y, 'atlas', 'node_lock/0').setScale(2).setInteractive(); if (i === 0 && Save.d.phase1) n.setTint(0xffd0a0); n.on('pointerup', () => this.pickNode(5 + i)); this.add.sprite(x, y - 14, 'atlas', 'icon_locked/0').setScale(0.8); });
+    FN.forEach((p, i) => { const [x, y] = S(p); const n = this.add.sprite(x, y, 'atlas', 'node_lock/0').setScale(2).setInteractive(); if (Save.d.phase2) n.setTint(0xffd0a0); n.on('pointerup', () => this.pickNode(LAST + i)); this.add.sprite(x, y - 14, 'atlas', 'icon_locked/0').setScale(0.8); });
     this.add.rectangle(W / 2, H - 46, W, 92, 0x1c1428, 0.82); this.nameT = txt(this, W / 2, H - 64, '', 40, '#fff0a0', { head: true }); this.subT = txt(this, W / 2, H - 26, '', 24, '#e0d8f0'); this.leo = this.add.sprite(0, 0, 'leo').setOrigin(0.5, 1).setScale(2).play('leo_idle').setDepth(5); this.sh = this.add.ellipse(0, 0, 30, 8, 0x1c1428, 0.4).setDepth(4);
-    this.at = clamp((this.from || Save.d.mapAt || 1) - 1, 0, 4); this.place(this.at); this.busy = false; this.info();
+    this.at = clamp((this.from || Save.d.mapAt || 1) - 1, 0, LAST - 1); this.place(this.at); this.busy = false; this.info();
     const bt = (x, l, f) => { const p = panel(this, x, 34, 176, 44, 'panel_btn').setInteractive({ useHandCursor: true }); txt(this, x, 31, l, 26); p.on('pointerup', () => { Audio.sfx('ok'); f(); }); }; bt(104, UI.cv, () => fadeTo(this, 'CV', { back: 'Map' })); bt(292, UI.title, () => fadeTo(this, 'Title')); bt(480, UI.settings, () => { this.scene.launch('Settings', { back: 'Map' }); this.scene.bringToTop('Settings'); this.busy = true; }); this.events.on('resumeMenu', () => { this.busy = false; });
     onKey(this, (e) => { if (this.busy) return; if (['ArrowRight', 'ArrowUp', 'd', 'w'].includes(e.key)) this.step(1); else if (['ArrowLeft', 'ArrowDown', 'a', 's'].includes(e.key)) this.step(-1); else if (['Enter', ' ', 'x', 'j', 'z'].includes(e.key) && !e.repeat) this.enter(); else if (e.key === 'c') fadeTo(this, 'CV', { back: 'Map' }); else if (e.key === 'Escape') fadeTo(this, 'Title'); });
-    this.cameras.main.fadeIn(500, 20, 14, 30); if (this.from && this.from < 5 && Save.d.unlocked > this.from) { this.busy = true; this.time.delayedCall(700, () => { Audio.sfx('checkpoint'); const n = this.nodes[this.from]; for (let i = 0; i < 8; i++) { const s = this.add.sprite(n.x, n.y, 'atlas', 'star/0').setScale(1.4); const a = i * 0.785; this.tweens.add({ targets: s, x: n.x + Math.cos(a) * 60, y: n.y + Math.sin(a) * 40, alpha: 0, duration: 800, onComplete: () => s.destroy() }); } this.busy = false; this.step(1); }); }
+    this.cameras.main.fadeIn(500, 20, 14, 30); if (this.from && this.from < LAST && Save.d.unlocked > this.from) { this.busy = true; this.time.delayedCall(700, () => { Audio.sfx('checkpoint'); const n = this.nodes[this.from]; for (let i = 0; i < 8; i++) { const s = this.add.sprite(n.x, n.y, 'atlas', 'star/0').setScale(1.4); const a = i * 0.785; this.tweens.add({ targets: s, x: n.x + Math.cos(a) * 60, y: n.y + Math.sin(a) * 40, alpha: 0, duration: 800, onComplete: () => s.destroy() }); } this.busy = false; this.step(1); }); }
   }
   place(i) { const [x, y] = this.S(NODES[i]); this.leo.setPosition(x, y); this.sh.setPosition(x, y); }
-  info(i = this.at) { const l = i < 5 ? LEVELS[i] : FUTURE[i - 5]; const open = i < 5 && i + 1 <= Save.d.unlocked; this.nameT.setText(i < 5 ? `${l.id}. ${l.name}` : l.name); this.subT.setText(i >= 5 ? (Save.d.phase1 ? l.soon : l.locked) : open ? `${l.sub}   ·   ${UI.mapHint}` : 'Locked. Finish the previous existential crisis first.'); }
-  step(d) { const n = this.at + d; if (this.busy || n < 0) return; if (n > 4 || n + 1 > Save.d.unlocked) { Audio.sfx('error', { v: 0.5 }); this.info(Math.min(6, n > 4 ? 5 : n)); return; } this.walk(n); }
+  info(i = this.at) { const l = i < LAST ? LEVELS[i] : FUTURE[i - LAST]; const open = i < LAST && i + 1 <= Save.d.unlocked; this.nameT.setText(i < LAST ? `${l.id}. ${l.name}` : l.name); this.subT.setText(i >= LAST ? (Save.d.phase2 ? l.soon : l.locked) : open ? `${l.sub}   ·   ${UI.mapHint}` : l.locked || 'Locked. Finish the previous existential crisis first.'); }
+  step(d) { const n = this.at + d; if (this.busy || n < 0) return; if (n >= LAST || n + 1 > Save.d.unlocked) { Audio.sfx('error', { v: 0.5 }); this.info(n); return; } this.walk(n); }
   walk(n, done) { this.busy = true; const [x, y] = this.S(NODES[n]); this.leo.setFlipX(x < this.leo.x).play('leo_run'); Audio.sfx('step'); this.tweens.add({ targets: [this.leo, this.sh], x, y, duration: 750, ease: 'Sine.inOut', onComplete: () => { this.busy = false; this.at = n; Save.d.mapAt = n + 1; Save.save(); this.leo.play('leo_idle').setFlipX(false); this.info(); done && done(); } }); }
-  pickNode(i) { if (this.busy) return; if (i > 4 || i + 1 > Save.d.unlocked) { Audio.sfx('error', { v: 0.5 }); this.info(i); return; } if (i === this.at) this.enter(); else this.walk(i); }
+  pickNode(i) { if (this.busy) return; if (i >= LAST || i + 1 > Save.d.unlocked) { Audio.sfx('error', { v: 0.5 }); this.info(i); return; } if (i === this.at) this.enter(); else this.walk(i); }
   enter() { if (this.busy || this._leaving || !LEVEL_DEFS[this.at + 1]) return; Audio.sfx('ok'); this.leo.play('leo_celebrate'); fadeTo(this, 'Level', { level: this.at + 1 }, 500); }
   update(t, dt) { this.clouds.tilePositionX += dt * 0.008; }
 }

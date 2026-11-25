@@ -35,3 +35,6 @@ Every push to `main` builds through GitHub Actions (`.github/workflows/deploy.ym
 Public URL: https://thuythanh-lab.github.io/Leo-dinh-cung-doc-to-Leo/
 
 The Vite base is relative (`./`), so all paths resolve under the repository sub-path.
+
+## Phase 2
+Finish Phase 1 to unlock level 6 on the world map. Tests: `node tests/phase2.mjs`, `node tests/playthrough.mjs 6 [--mortal] [--detour]`.

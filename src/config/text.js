@@ -25,10 +25,10 @@ export const LEVELS = [
   { id: 3, name: 'The Q1 Publication Tower', sub: 'Estimated review time: geological.' },
   { id: 4, name: 'The Funding Hunger Games', sub: 'May the budget line be ever in your favour.' },
   { id: 5, name: 'Bureaucracy: The Final Form', sub: 'Please complete Form 1 to request Form 1.' },
+  { id: 6, name: 'The Fieldwork Survival Era', sub: 'Phase 2. The plan was theoretical.', locked: 'Finish Phase 1 first. Something is rustling out there.' },
 ];
 export const FUTURE = [
-  { name: 'Phase 2: The Fieldwork Survival Era', locked: 'Something is rustling out there. Locked.', soon: 'Coming soon. Reality is warming up.' },
-  { name: 'Phase 3: ???', locked: 'Hidden by clouds. Locked.', soon: 'Hidden by clouds. Locked.' },
+  { name: 'Phase 3: ???', locked: 'Hidden by clouds. Locked.', soon: 'The Đốc Tờ Era. Still under review.' },
 ];
 
 export const ASSIST = {
@@ -100,3 +100,24 @@ export const UI = {
   cvTitle: 'ACADEMIC CV', cvName: 'Léo, PhD candidate', cvMain: 'Milestones', cvSecret: 'Footnotes (secret)', cvLocked: '???', cvFuture: 'Future chapters: redacted', cvHint: 'Not yet peer reviewed.', cvPubs: 'Publications', complete: 'LEVEL COMPLETE', rotate: 'Best played in landscape.',
   controls: 'Move: Arrows / WASD    Jump: Space    Slide: Down while running\nMagic pen + interact: X or J    Assistant: E    Pause: Esc',
 };
+
+// ------------------------------------------------------------------ Phase 2
+export const P2 = {
+  intro: ['THE FIELDWORK SURVIVAL ERA', 'Phase 2. The plan was theoretical.'],
+  flood: 'The field did not read your proposal.', slide: 'Reality has entered the chat.', buffalo: "It wasn't on the bingo card.", bridge: 'Methodology left the chat.',
+  finding: ['Finding 1: it depends.', 'Finding 2: it depends on the river.', 'Finding 3: unexpected, therefore novel.', 'Finding 4: n = 1, but a very good 1.', 'Finding 5: contradicts findings 1 to 4.'],
+  findings: (n) => (n >= 5 ? 'All 5 findings collected. Suspiciously thorough.' : `${n}/5 findings. The rest are "future research".`),
+  goat: 'Participant 7 ate the consent form.', grass: ['FIELDWORK COMPLETED', 'Touched grass. For research purposes.'],
+  zone2: ['THE DISSERTATION ERA', 'Now write all of it down.'],
+  stress: 'Mentally AFK.', stressGone: 'The cloud found someone with a deadline.', stressHit: 'Stress delegated.',
+  block: 'No thoughts. Just vibes.', bulb: 'Inspiration acquired!', blockDone: "We're so back.",
+  rewrite: 'Not the chapter revision again.', rewriteAlt: 'New route suggested in the comments.', rewrite2: 'The audacity.', crushed: 'Bro is cooked.', corridor: "We're so back.",
+  chapter: ['Chapter 1: Introduction. Rewritten.', 'Chapter 2: Literature. All of it.', 'Chapter 3: Methods. Post-chat.', 'Chapter 4: Findings. It depends.', 'Chapter 5: Discussion. Ongoing.'],
+  backup: 'Missing chapters recovered from thesis_final_v26.', assembled: ['ALL CHAPTERS COMPLETED', 'HE ACTUALLY COOKED.'],
+  endLines: ['Léo had climbed further than the proposal predicted.', 'Behind him: five levels, one goat and 247 tracked changes.', 'Ahead of him: the last part.'],
+  endCard: ['PHASE 2 COMPLETE', 'Dissertation: Completed.', 'Sanity: Under review.'], endNext: 'Next quest: THE ĐỐC TỜ ERA',
+};
+Object.assign(SIGNS, {
+  p2plan: 'Day 1 of fieldwork.\nThe plan is laminated.', p2bridge: 'Bridge: 60% complete.\nSince 2009.', p2goat: 'Interview in progress.', p2bus: 'Next bus: Tuesday.\nNext buffalo: now.', p2rope: 'Maximum load:\none methodology.', p2station: 'Field station.\nWi-Fi: spiritual.',
+  p2doc: 'thesis_final.docx\n(Not responding)', p2cloud: 'Forecast: deadlines,\n100% chance.', p2block: 'Chapter 2\n|', p2super: 'From: Supervisor\n"Quick comments :)"', p2super2: 'From: Supervisor\n"One more small thing."', p2last: 'Word count: yes.',
+});

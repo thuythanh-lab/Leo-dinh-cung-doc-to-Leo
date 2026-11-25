@@ -10,15 +10,17 @@ import { LEVEL_DEFS } from '../levels/index.js';
 import Player from '../entities/Player.js';
 import Assistant from '../entities/Assistant.js';
 import Fx from '../entities/fx.js';
+import { freshState } from '../core/stability.js';
 import { Plat } from '../entities/platforms.js';
 
 export default class LevelScene extends Phaser.Scene {
   constructor() { super('Level'); }
-  init(d) { this.levelId = d.level || 1; this._leaving = false; }
+  init(d) { freshState(this); this.levelId = LEVEL_DEFS[d && d.level] ? d.level : 1; this._leaving = false; }
 
   create() {
     const def = LEVEL_DEFS[this.levelId]; this.def = def;
-    Object.assign(this, { ents: [], enemies: [], hittable: [], interacts: [], machines: [], stress: [], bolts: [], triggers: [], clock: 0, cinematic: false, teleporting: false, combo: 0, interactTarget: null, hudItems: def.hudItems || [], waters: [], script: null, deadUntil: 0, zone: null, bg: null, killBelow: null, amb: null, onOneWay: false, hazMsg: 0, finished: false, shade: null, stopped: false, run: null, cp: null, lm: -9e9, bossTick: null, killBelowFn: null, raHint: null });
+    Object.assign(this, { ents: [], enemies: [], hittable: [], interacts: [], machines: [], stress: [], bolts: [], triggers: [], clock: 0, cinematic: false, teleporting: false, combo: 0, interactTarget: null, hudItems: def.hudItems || [], waters: [], script: null, deadUntil: 0, zone: null, bg: null, killBelow: null, amb: null, onOneWay: false, hazMsg: 0, finished: false, shade: null, stopped: false, run: null, cp: null, lm: -9e9, bossTick: null, killBelowFn: null, raHint: null, lockAt: 0, doneAt: 0, sayQ: [] });
+    const c0 = Save.d.run && Save.d.run.cp; if (c0 && Save.d.run.level === this.levelId && !(c0.x > 0 && c0.y > 0 && c0.x < def.w * T && c0.y < def.h * T)) Save.d.run.cp = null; // checkpoint that no longer exists
     const resumed = Save.d.run && Save.d.run.level === this.levelId && Save.d.run.cp; this.run = Save.startRun(this.levelId);
     this.physics.world.timeScale = 1; this.physics.world.resume();
     this.fx = new Fx(this); this.platGroup = this.physics.add.group({ allowGravity: false, immovable: true }); this.solids = this.physics.add.staticGroup();
@@ -32,7 +34,7 @@ export default class LevelScene extends Phaser.Scene {
     const cam = this.cameras.main; cam.setZoom(VIEW.zoom); cam.setRoundPixels(true); cam.startFollow(this.player, true, 0.14, 0.12); cam.setDeadzone(26, 34); this.look = 0;
     // hud first: entities may talk to it
     if (this.scene.isActive('HUD')) this.scene.stop('HUD');
-    this.scene.launch('HUD', { level: this }); this.hud = this.scene.get('HUD');
+    this.hud = this.scene.get('HUD'); this.hud.ready = false; this.hud.talking = false; this.hud.pending = []; this.scene.launch('HUD', { level: this }); // anything shown before the new HUD exists is queued
     C.bind(this);
     def.build(this.b, this);
     if (resumed) { this.player.setPosition(this.run.cp.x, this.run.cp.y); const m = this.machines.find((q) => Math.abs(q.x - this.run.cp.x) < 4 && Math.abs(q.y - this.run.cp.y) < 4); m && m.activate(true); this.time.delayedCall(700, () => this.toast(TOAST.resume)); }
@@ -43,8 +45,8 @@ export default class LevelScene extends Phaser.Scene {
     if (!resumed) this.time.delayedCall(300, () => this.hud.banner(def.name, def.sub));
     if (import.meta.env.DEV || location.search.includes('debug')) window.__L = this;
   }
-  autoPause() { if (this.scene.isActive() && !this.cinematic && !location.search.includes('debug')) this.pause(); }
-  pause() { if (this.finished || !this.scene.isActive() || this.hud.talking) return; Audio.sfx('open'); Audio.duck(true); C.clear(); this.scene.pause(); this.scene.pause('HUD'); this.scene.launch('Pause', { level: this.levelId }); this.scene.bringToTop('Pause'); }
+  autoPause() { if (this.scene.isActive() && !this.cinematic && (!location.search.includes('debug') || location.search.includes('autopause'))) this.pause(); else C.release(); }
+  pause() { if (this.finished || !this.scene.isActive() || this.hud.talking) return; Audio.sfx('open'); Audio.duck(true); C.release(); this.scene.pause(); this.scene.pause('HUD'); this.scene.launch('Pause', { level: this.levelId }); this.scene.bringToTop('Pause'); }
 
   // ---------------------------------------------------------------- loop
   update(time, delta) {
@@ -57,7 +59,7 @@ export default class LevelScene extends Phaser.Scene {
     this.hud.tick(full);
   }
   step(dt) {
-    this.clock += dt; const p = this.player;
+    this.clock += dt; const p = this.player; this.watch(dt);
     // prompt target
     this.interactTarget = null; if (!this.cinematic) { let bd = 1e9; for (const i of this.interacts) { if (i.dead || !i.can()) continue; const dx = Math.abs(i.x - p.x); const dy = p.y - i.y; if (dx < i.range + 4 && dy > -44 && dy < 20 && dx < bd) { bd = dx; this.interactTarget = i; } } }
     this.hud.prompt(this.interactTarget);
@@ -71,7 +73,7 @@ export default class LevelScene extends Phaser.Scene {
       if (t && t.kind === 'haz' && p.hurt()) { if (this.clock - this.hazMsg > 9000) { this.hazMsg = this.clock; this.toast(TOAST.hazard); } if (p.hearts > 0) this.time.delayedCall(260, () => p.alive && this.toSafe()); }
       const z = this.zone; if (z && p.y > (z.y + z.h) * T + 26) this.pit();
       else if (this.killBelow && p.y > this.killBelow) { this.toast(TOAST.tower); this.toSafe(); }
-      for (const tr of this.triggers) if (!tr.done && p.floor && p.x > tr.x && p.x < tr.x + tr.w && p.y > tr.y && p.y <= tr.y + tr.h) { tr.done = tr.once; tr.fn(); }
+      for (const tr of this.triggers) if (!tr.done && p.alive && !this.cinematic && !this.teleporting && !this.finished && p.floor && p.x > tr.x && p.x < tr.x + tr.w && p.y > tr.y && p.y <= tr.y + tr.h) { tr.done = tr.once; tr.fn(); }
     }
     if (this.script) this.script(dt);
   }
@@ -126,8 +128,8 @@ export default class LevelScene extends Phaser.Scene {
     this.hud.refresh(); z.onEnter && z.onEnter();
   }
   teleport(tx, ty, done, ms = 260) {
-    if (this.teleporting) return; this.teleporting = true; const p = this.player; p.locked = true; const cam = this.cameras.main; cam.fadeOut(ms, 20, 14, 30);
-    this.time.delayedCall(ms + 30, () => { p.body.reset(tx * T, ty * T); p.safe = { x: p.x, y: p.y }; p.ride = null; this.enterZone(); cam.centerOn(p.x, p.y); if (this.assistant.s) this.assistant.s.setPosition(p.x, p.y); cam.fadeIn(ms, 20, 14, 30); this.teleporting = false; p.locked = this.cinematic; done && done(); });
+    if (this.teleporting || !this.player.alive || this.finished) return; this.teleporting = true; const p = this.player; p.locked = true; const cam = this.cameras.main; cam.fadeOut(ms, 20, 14, 30);
+    this.time.delayedCall(ms + 30, () => { p.body.reset(tx * T, ty * T); p.safe = { x: p.x, y: p.y }; p.ride = null; this.enterZone(); cam.centerOn(p.x, p.y); if (this.assistant.s) this.assistant.s.setPosition(p.x, p.y); cam.fadeIn(ms, 20, 14, 30); this.teleporting = false; p.locked = this.cinematic; C.clear(); done && done(); });
   }
   trigger(x, y, w, h, fn, once = true) { this.triggers.push({ x: x * T, y: y * T, w: w * T, h: h * T, fn, once }); }
   setCheckpoint(x, y) { this.cp = { x, y }; this.run.cp = { x, y }; Save.save(); }
@@ -145,7 +147,7 @@ export default class LevelScene extends Phaser.Scene {
     this.time.delayedCall(1900, () => { this.hud.deathEnd(); this.respawn(); });
   }
   respawn() {
-    const p = this.player; Audio.duck(false); p.alive = true; p.hearts = P.hearts; p.stun = 0; p.inv = 900; p.stressT = 0; p.climbing = false; p.slideT = 0; p.setHeight2(25); p.setDepth(20); p.body.checkCollision.none = false; p.body.setAllowGravity(false); p.body.setGravityY(0); p.body.reset(this.cp.x, this.cp.y); p.safe = { ...this.cp }; p.setAngle(0);
+    const p = this.player; Audio.duck(false); p.alive = true; p.locked = this.cinematic; if (!this.cinematic) p.forceAnim = null; p.jumping = false; p.launch = 0; p.drop = 0; p.hearts = P.hearts; p.stun = 0; p.inv = 900; p.stressT = 0; p.climbing = false; p.slideT = 0; p.setHeight2(25); p.setDepth(20); p.body.checkCollision.none = false; p.body.setAllowGravity(false); p.body.setGravityY(0); p.body.reset(this.cp.x, this.cp.y); p.safe = { ...this.cp }; p.setAngle(0);
     this.enemies.forEach((e) => { if (e.o.boss || e.vx !== undefined) { e.gone = true; e.dead = true; e.setVisible(false); if (e.body) e.body.enable = false; } else e.respawn(); }); this.stress.forEach((s) => s.reset()); this.enterZone(); this.cameras.main.centerOn(p.x, p.y); this.cameras.main.fadeIn(350, 20, 14, 30); this.hud.refresh(); this.def.onRespawn && this.def.onRespawn(this);
     this.enemies = this.enemies.filter((e) => !e.gone); this.ents = this.ents.filter((e) => !e.gone); this.hittable = this.hittable.filter((e) => !e.gone);
   }
@@ -157,17 +159,30 @@ export default class LevelScene extends Phaser.Scene {
   letterMsg() { if (this.clock - (this.lm || -9e9) < 6000) return; this.lm = this.clock; this.toast(TOAST.letter[0], { title: BIG.rejLetter, color: '#ff9a8a' }); this.toast(TOAST.letter[1]); }
   unlock(id) { if (Save.unlock(id)) this.hud.achievement(id); }
   hitStop(ms) { if (this.stopped) return; this.stopped = true; this.physics.world.pause(); this.time.delayedCall(ms, () => { this.stopped = false; this.physics.world.resume(); }); }
-  lock(v = true) { this.cinematic = v; this.player.locked = v; if (v) { this.player.body.setVelocityX(0); C.clear(); } this.hud.refresh(); }
-  say(lines, done) { if (this.hud.talking) return; this.lock(true); this.hud.say(lines, () => { this.lock(false); done && done(); }); }
+  lock(v = true) { this.cinematic = v; this.player.locked = v; this.lockAt = this.clock; if (v) { this.player.body.setVelocityX(0); C.clear(); } this.hud.refresh(); }
+  say(lines, done) { if (this.hud.talking || this.sayBusy) { this.sayQ.push([lines, done]); return; } this.sayBusy = true; this.lock(true); this.hud.say(lines, () => { this.sayBusy = false; this.lock(false); done && done(); }); }
+  dialogueEnded() { this.lockAt = this.clock; const q = this.sayQ.shift(); if (q) this.say(...q); }
+  /** Last-resort guards: no lock, dialogue or ending may outlive any real sequence. Times are gameplay time, so pausing never triggers them. */
+  watch() {
+    const p = this.player; const h = this.hud; if (h.talking) this.lockAt = this.clock;
+    if (this.cinematic && !this.finished && !h.talking && this.clock - this.lockAt > 45000) { console.error('[recovered] gameplay lock released', this.levelId); this.sayBusy = false; this.lock(false); p.forceAnim = null; this.cameras.main.startFollow(p, true, 0.14, 0.12); }
+    if (!this.cinematic && p.locked && !this.teleporting) p.locked = false;
+    if (!p.alive && !this.finished) { this.deadFor = (this.deadFor || 0) + 17; if (this.deadFor > 9000) { this.deadFor = 0; h.deathEnd(); this.respawn(); } } else this.deadFor = 0;
+    if (this.stopped) { this.stopFor = (this.stopFor || 0) + 1; if (this.stopFor > 180) { this.stopped = false; this.stopFor = 0; this.physics.world.resume(); } } else this.stopFor = 0;
+    if (this.finished && !this._leaving && this.clock - this.doneAt > 30000) this.exitLevel();
+  }
+  /** Pause-menu rescue: back to the last coffee machine with controls restored. Nothing earned is lost. */
+  unstick() { Save.save(); this.scene.restart({ level: this.levelId }); }
   wait(ms, fn) { return this.time.delayedCall(ms, fn); }
   stampSlam(ink, x, y, o = {}) { // giant ink stamp slammed on screen-space centre of the world view
     const s = this.add.image(x, y, 'atlas', `${ink}/0`).setDepth(50).setScale(o.from || 4).setAlpha(0).setAngle(o.angle ?? -8); this.tweens.add({ targets: s, scale: o.scale || 1.1, alpha: 1, duration: 200, ease: 'Quad.in', onComplete: () => { Audio.sfx(ink === 'ink_app' ? 'stampyes' : 'stampno'); this.cameras.main.shake(320, 0.014); this.fx.ring(x, y, ink === 'ink_app' ? 0x8fffb0 : 0xff8080, 3); o.done && o.done(); } }); this.tweens.add({ targets: s, alpha: 0, delay: o.hold || 1500, duration: 400, onComplete: () => s.destroy() }); return s;
   }
   celebrate() { this.player.forceAnim = 'leo_celebrate'; this.player.body.setVelocityX(0); }
   finish(extra) {
-    if (this.finished) return; this.finished = 1; this.lock(true); this.celebrate(); this.fx.rain(2600); Audio.sfx('fanfare'); if (!this.tookDamage) this.unlock('productive'); Save.complete(this.levelId); const id = this.levelId;
-    this.wait(600, () => this.hud.complete(!this.run.flags.hurt, () => { Save.d.mapAt = Math.min(5, id + 1); if (id >= 5) { Save.d.mapAt = id; Save.save(); this.leave({ 5: 'Ending', 6: 'Ending2', 7: 'Defence' }[id]); } else { Save.save(); this.leave('Map', { from: id }); } })); extra && extra();
+    if (this.finished) return; this.finished = 1; this.doneAt = this.clock; this.lock(true); this.celebrate(); this.fx.rain(2600); Audio.sfx('fanfare'); if (!this.tookDamage) this.unlock('productive'); Save.complete(this.levelId); const id = this.levelId;
+    this.wait(600, () => this.hud.complete(!this.run.flags.hurt, () => this.exitLevel())); void id; extra && extra();
   }
+  exitLevel() { const id = this.levelId; Save.d.mapAt = Math.min(id >= 5 ? id : 5, id >= 5 ? id : id + 1); Save.save(); if (id >= 5) this.leave({ 5: 'Ending', 6: 'Ending2', 7: 'Defence' }[id]); else this.leave('Map', { from: id }); }
   leave(key, data) { if (this._leaving) return; this._leaving = true; this.cameras.main.fadeOut(500, 20, 14, 30); this.time.delayedCall(540, () => { this.scene.stop('HUD'); this.scene.start(key, data); }); }
 }
 export { Plat, fadeTo };

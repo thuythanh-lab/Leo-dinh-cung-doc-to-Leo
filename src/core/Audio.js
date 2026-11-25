@@ -13,16 +13,18 @@ class AudioMan {
   sfx(k, o = {}) {
     if (!this.game || !this.game.cache.audio.exists(`s_${k}`)) return;
     const now = performance.now(); if (now - (this.last[k] || 0) < 35) return; this.last[k] = now;
-    this.game.sound.play(`s_${k}`, { volume: Save.settings.sfx * (GAIN[k] ?? 0.85) * (o.v ?? 1), rate: o.rate ?? 1 });
+    try { this.game.sound.play(`s_${k}`, { volume: Save.settings.sfx * (GAIN[k] ?? 0.85) * (o.v ?? 1), rate: o.rate ?? 1 }); } catch { /* sound is optional */ }
   }
-  music(scene, k, fade = 900) {
+  /** Music is optional: a failure here must never interrupt the game. */
+  music(scene, k, fade = 900) { try { this.musicNow(scene, k, fade); } catch (e) { console.warn('music', e); this.want = null; } }
+  musicNow(scene, k, fade) {
     this.ask = k; this.askScene = scene;
     if (GAMEPLAY.has(k)) {
       if (!this.ready) { this.loading.then(() => { if (this.ask === k && scene.sys.isActive()) this.music(scene, k, fade); }); return; }
       if (this.theme) { this.ambient(scene, k === 'nature'); k = THEME; }
     } else this.ambient(scene, false);
     if (this.want === k) return; this.want = k;
-    const start = () => { if (this.want === k) this.swap(k, fade); };
+    const start = () => { try { if (this.want === k) this.swap(k, fade); } catch (e) { console.warn('music', e); this.want = null; } };
     if (!k) return this.swap(null, fade);
     if (this.game.cache.audio.exists(`m_${k}`)) return start();
     scene.load.audio(`m_${k}`, `assets/audio/music/${FILE[k] || k}.mp3`); scene.load.once(`filecomplete-audio-m_${k}`, start); scene.load.start();
@@ -43,7 +45,7 @@ class AudioMan {
     if (live) this.swap(THEME, 400); else if (GAMEPLAY.has(this.want)) { this.want = THEME; this.swap(THEME, 400); }
   }
   /** Use the player's MP3. Resolves true if it was also remembered for next time. */
-  async choose(file) { await this.loading; const p = await readPicked(this.game, file); this.setTheme(p.buffer, p.name); try { await store({ bytes: p.bytes, name: p.name }); navigator.storage?.persist?.().catch(() => {}); return true; } catch { return false; } }
+  async choose(file) { const p = await readPicked(this.game, file); this.setTheme(p.buffer, p.name); try { await store({ bytes: p.bytes, name: p.name }); navigator.storage?.persist?.().catch(() => {}); return true; } catch { return false; } }
   async unchoose() {
     await forget(); const b = await defaultSong(this.game); if (b) return this.setTheme(b, null);
     const key = `m_${THEME}`; const live = this.want === THEME; this.theme = false; this.customName = null; this.pos = 0; this.ambient(this.askScene, false);
@@ -61,7 +63,7 @@ class AudioMan {
     s._ramp = setInterval(() => {
       const p = Math.min(1, (performance.now() - t0) / Math.max(1, ms));
       try { s.setVolume(from + (to - from) * p); } catch { clearInterval(s._ramp); return; }
-      if (p >= 1) { clearInterval(s._ramp); done && done(); }
+      if (p >= 1) { clearInterval(s._ramp); try { done && done(); } catch { /* already gone */ } }
     }, 40);
   }
   duck(on) { if (this.cur) this.ramp(this.cur, Save.settings.music * (on ? 0.25 : 1), 250); }

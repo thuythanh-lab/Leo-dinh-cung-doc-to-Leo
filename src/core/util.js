@@ -78,10 +78,13 @@ export function onKey(scene, fn) {
   scene.input.keyboard.on('keydown', h); return h;
 }
 
+/** Fade out, then start a scene exactly once. Finishes on the fade event, or on a real-time timer if the fade stalls. */
 export function fadeTo(scene, key, data, ms = 350) {
-  if (scene._leaving) return; scene._leaving = true;
-  scene.cameras.main.fadeOut(ms, 20, 14, 30);
-  scene.cameras.main.once('camerafadeoutcomplete', () => scene.scene.start(key, data));
+  if (scene._leaving) return; scene._leaving = true; let gone = false; const cam = scene.cameras.main;
+  const stop = () => { clearTimeout(t); scene.events.off('shutdown', stop); };
+  const go = () => { if (gone) return; gone = true; stop(); cam.off('camerafadeoutcomplete', go); scene.scene.start(key, data); };
+  const t = setTimeout(() => { if (!gone && (scene.sys.isActive() || scene.sys.isPaused())) go(); }, ms + 2500); scene.events.once('shutdown', () => { gone = true; stop(); });
+  cam.once('camerafadeoutcomplete', go); cam.fadeOut(ms, 20, 14, 30);
 }
 
 export const isTouch = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;

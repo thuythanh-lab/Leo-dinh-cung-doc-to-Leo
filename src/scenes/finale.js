@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { P3, UI } from '../config/text.js';
 import { Save } from '../core/Save.js';
 import { Audio } from '../core/Audio.js';
+import { isOk, freshState } from '../core/stability.js';
 import { txt, panel, fadeTo, onKey, pick } from '../core/util.js';
 
 const W = 960; const H = 540;
@@ -14,6 +15,7 @@ const leave = (s, key, d) => fadeTo(s, key, d || {}, 600);
 // ------------------------------------------------------------------ the defence
 export class Defence extends Phaser.Scene {
   constructor() { super('Defence'); }
+  init() { freshState(this); }
   create() {
     this._leaving = false; if (!Save.d.complete) { Save.d.complete = Date.now(); } Save.d.phase3 = true; Save.d.mapAt = 7; Save.unlock('phd'); Save.save(); Audio.music(this, null, 400); this.cameras.main.fadeIn(800, 20, 14, 30);
     this.add.image(W / 2, H / 2, 'bg_library_sky').setDisplaySize(W, H); ['far', 'mid'].forEach((k) => this.add.tileSprite(W / 2, H / 2 - 30, W / 2, 300, `bg_library_${k}`).setScale(2)); this.add.rectangle(W / 2, 470, W, 150, 0x3a2440); this.add.rectangle(W / 2, 398, W, 6, 0xc98f4a);
@@ -41,6 +43,7 @@ export class Defence extends Phaser.Scene {
 // ------------------------------------------------------------------ beyond the summit
 export class Summit extends Phaser.Scene {
   constructor() { super('Summit'); }
+  init() { freshState(this); }
   create() {
     this._leaving = false; Audio.music(this, 'ending', 1500); const c = this.cameras.main; c.fadeIn(1500, 255, 244, 220); this.add.image(0, 0, 'horizon').setOrigin(0, 0).setScale(2); this.v = this.add.image(120, 540, 'vista').setOrigin(0, 0); this.top = this.add.rectangle(0, 100, 1400, 441, 0x1f3a7c).setOrigin(0, 0); this.cl = this.add.tileSprite(960, 420, 1920, 300, 'bg_sunset_clouds').setAlpha(0.35); const leo = this.add.sprite(920, 580, 'atlas', 'grad/0').setOrigin(0.5, 1).setScale(0.8).play('grad').setDepth(5); this.leo = leo;
     for (let i = 0; i < 9; i++) { const b = this.add.sprite(700 - i * 34, 470 + (i % 4) * 18, 'atlas', 'bird/0').play({ key: 'bird', startFrame: i % 4 }).setScale(0.8); this.tweens.add({ targets: b, x: b.x + 1500, y: b.y - 260, duration: 42000 + i * 1300 }); } const gl = this.add.image(1280, 500, 'atlas', 'glow_w/0').setScale(9).setBlendMode('ADD').setTint(0xffc890).setAlpha(0.35); this.tweens.add({ targets: gl, alpha: 0.55, yoyo: true, repeat: -1, duration: 3200 });
@@ -51,6 +54,7 @@ export class Summit extends Phaser.Scene {
 }
 export class SummitUI extends Phaser.Scene {
   constructor() { super('SummitUI'); }
+  init() { freshState(this); }
   create() {
     this.gone = false; const t = txt(this, W / 2, 92, '', 40, '#fffaf0', { st: 9, wrap: 860 }).setAlpha(0); const show = (at, s, ms) => { this.time.delayedCall(at, () => { t.setText(s); this.tweens.add({ targets: t, alpha: 1, duration: 900 }); }); this.time.delayedCall(at + ms, () => this.tweens.add({ targets: t, alpha: 0, duration: 800 })); };
     show(7600, P3.summit[0], 5600); show(16600, P3.summit[1], 5400); show(24200, P3.summit[2], 5600); this.time.delayedCall(31500, () => this.out()); skip(this, () => this.out());
@@ -61,13 +65,12 @@ export class SummitUI extends Phaser.Scene {
 // ------------------------------------------------------------------ the letter
 export class Letter extends Phaser.Scene {
   constructor() { super('Letter'); }
-  init(d) { this.again = !!(d && d.again); }
   create() {
     this._leaving = false; this.open = false; Audio.music(this, 'ending', 1200); this.cameras.main.fadeIn(700, 255, 244, 220); this.add.image(0, 0, 'horizon').setOrigin(0, 0); this.add.rectangle(W / 2, H / 2, W, H, 0x2a1a38, 0.62);
     for (let i = 0; i < 26; i++) { const q = img(this, Math.random() * W, Math.random() * H, 'mote', 0, 2).setAlpha(0.6).setBlendMode('ADD'); this.tweens.add({ targets: q, y: q.y - 60, alpha: 0, duration: 3000 + Math.random() * 3000, repeat: -1, delay: Math.random() * 3000 }); }
     const c = this.add.container(W / 2, -220).setDepth(10); this.c = c; const back = img(this, 0, 0, 'envelope', 0, 2.2); const flap = img(this, 0, -132, 'flap', 0, 2.2).setOrigin(0.5, 0); const seal = img(this, 0, 14, 'seal', 0, 2.2); const sh = img(this, 0, 14, 'glow_w', 0, 2).setBlendMode('ADD').setTint(0xffd060); c.add([back, flap, sh, seal]); this.tweens.add({ targets: sh, scale: 2.6, alpha: 0.4, yoyo: true, repeat: -1, duration: 700 }); this.tweens.add({ targets: c, y: 270, duration: 1200, ease: 'Bounce.out' }); Audio.sfx('summon'); this.tweens.add({ targets: c, angle: 1.5, yoyo: true, repeat: -1, duration: 1500, ease: 'Sine.inOut' });
     const hint = txt(this, W / 2, 486, P3.open, 30, '#fff0a0', { st: 6 }).setAlpha(0); this.tweens.add({ targets: hint, alpha: 1, delay: 1300, duration: 400, yoyo: true, repeat: -1, hold: 500 }); this.hint = hint; back.setInteractive({ useHandCursor: true }); seal.setInteractive({ useHandCursor: true }); const go = () => this.openIt(flap, seal, sh); back.on('pointerup', go); seal.on('pointerup', go); this.input.on('pointerup', (p) => { if (!this.open && Math.abs(p.x - W / 2) < 210 && Math.abs(p.y - 270) < 150) go(); }); this.go = go;
-    onKey(this, (e) => { if (['Enter', ' ', 'x'].includes(e.key) && !e.repeat) { if (!this.open) go(); else if (this.btn) this.close(); } else if (e.key === 'Escape' && this.btn) this.close(); });
+    onKey(this, (e) => { if (isOk(e)) { if (!this.open) go(); else if (this.btn) this.close(); } else if (e.key === 'Escape' && this.btn) this.close(); });
   }
   openIt(flap, seal, sh) {
     if (this.open) return; this.open = true; this.hint.destroy(); this.tweens.killTweensOf(this.c); this.c.setPosition(W / 2, 270).setAngle(0); sh.setVisible(false); Audio.sfx('glass'); confetti(this, W / 2, 284, 24, 160); const a = img(this, 0, 14, 'seal', 1, 2.2); const b = img(this, 0, 14, 'seal', 2, 2.2); this.c.add([a, b]); seal.setVisible(false); this.tweens.add({ targets: a, x: -70, y: 190, angle: -70, alpha: 0, duration: 900, ease: 'Quad.in' }); this.tweens.add({ targets: b, x: 70, y: 190, angle: 70, alpha: 0, duration: 900, ease: 'Quad.in' });
@@ -81,7 +84,7 @@ export class Letter extends Phaser.Scene {
   close() { if (this.closing) return; this.closing = true; Audio.sfx('bookclose'); this.tweens.add({ targets: this.paper, y: 700, scale: 0.5, angle: 12, duration: 600, ease: 'Back.in' }); this.btn.show(false); this.time.delayedCall(500, () => leave(this, this.again ? 'Title' : 'Oracle')); }
   shutdown() { this.closing = false; }
 }
-Letter.prototype.init = function init(d) { this.again = !!(d && d.again); this.closing = false; this.btn = null; this.open = false; };
+Letter.prototype.init = function init(d) { freshState(this); this.again = !!(d && d.again); this.closing = false; this.btn = null; this.open = false; };
 
 // ------------------------------------------------------------------ the academic oracle
 export class Oracle extends Phaser.Scene {
@@ -90,8 +93,8 @@ export class Oracle extends Phaser.Scene {
     this._leaving = false; this.busy = false; this.timers = []; this.vig = null; Save.d.future.oracle = Save.d.future.oracle || { deck: [], seen: [] }; this.S = Save.d.future.oracle; Audio.music(this, 'oracle', 900); this.cameras.main.fadeIn(800, 12, 6, 30); this.cameras.main.setBackgroundColor('#140a2c');
     for (let i = 0; i < 70; i++) { const s = img(this, Math.random() * W, Math.random() * H, 'mote', 0, 1 + Math.random() * 1.6).setAlpha(Math.random() * 0.8); this.tweens.add({ targets: s, alpha: 0.1, yoyo: true, repeat: -1, duration: 700 + Math.random() * 2200 }); } this.glow = img(this, W / 2, 250, 'glow_p', 0, 6).setBlendMode('ADD').setAlpha(0.6); this.tweens.add({ targets: this.glow, scale: 7, yoyo: true, repeat: -1, duration: 1900, ease: 'Sine.inOut' });
     txt(this, W / 2, 44, P3.oracle[0], 62, '#ffd24a', { head: true, st: 10 }); this.sub = txt(this, W / 2, 88, P3.oracle[1], 27, '#e0c8ff', { st: 5 }); this.ball = img(this, W / 2, 262, 'crystal', 0, 2.2).play('crystal').setDepth(4); this.tweens.add({ targets: this.ball, y: 256, yoyo: true, repeat: -1, duration: 1400, ease: 'Sine.inOut' }); this.out = txt(this, W / 2, 396, '', 29, '#fff6e0', { st: 6, wrap: 860 }).setDepth(20); this.count = txt(this, 24, 516, '', 22, '#c8a8f0', { ox: 0, st: 3 }); this.final = txt(this, W / 2, 440, '', 25, '#ffe9a0', { st: 5 }).setDepth(20);
-    this.btn = button(this, W / 2, 482, P3.reveal, () => this.reveal(), 400); this.done = button(this, 852, 516, P3.leave, () => this.exit(), 180); this.done.t.setFontSize(22); txt(this, W / 2, 524, P3.disclaimer, 19, '#a890d0', { st: 3 }); this.tick(); onKey(this, (e) => { if (['Enter', ' ', 'x'].includes(e.key) && !e.repeat) this.reveal(); else if (e.key === 'Escape') this.exit(); });
-    this.events.once('shutdown', () => Audio.sfx('close'));
+    this.btn = button(this, W / 2, 482, P3.reveal, () => this.reveal(), 400); this.done = button(this, 852, 516, P3.leave, () => this.exit(), 180); this.done.t.setFontSize(22); txt(this, W / 2, 524, P3.disclaimer, 19, '#a890d0', { st: 3 }); this.tick(); onKey(this, (e) => { if (isOk(e)) this.reveal(); else if (e.key === 'Escape') this.exit(); });
+    this.events.once('shutdown', () => { this.mask2 && this.mask2.destroy(); this.mask2 = null; });
   }
   tick() { const n = this.S.seen.length; this.count.setText(n ? `${P3.found}: ${n}/5` : ''); if (n >= 5) this.final.setText(P3.final); }
   next() { if (!this.S.deck.length) { const d = Phaser.Utils.Array.Shuffle([0, 1, 2, 3, 4]); if (d[4] === this.S.last) d.unshift(d.pop()); this.S.deck = d; } const i = this.S.deck.pop(); this.S.last = i; if (!this.S.seen.includes(i)) this.S.seen.push(i); Save.save(); return i; }
@@ -125,4 +128,4 @@ export class Oracle extends Phaser.Scene {
   kitchen(c) { this.put(c, 70, 112, 'wok', 0, 2.2).setOrigin(0.5, 1).play('wok'); const leo = this.put(c, -80, 118, 'nemleo', 0, 3.6).setOrigin(0.5, 1).play('nemleo'); this.tweens.add({ targets: leo, x: -72, yoyo: true, repeat: -1, duration: 130 }); this.every(420, () => { if (!c.active) return; const n = this.put(c, 40 + Math.random() * 60, 40, 'nem', 0, 2); this.tweens.add({ targets: n, y: -70, angle: 360, yoyo: true, duration: 420, ease: 'Quad.out', onComplete: () => n.destroy() }); if (Math.random() < 0.5) Audio.sfx('pot', { v: 0.35 }); const s = this.put(c, 60 + Math.random() * 40, 20, 'dust', 0, 2).setAlpha(0.6); this.tweens.add({ targets: s, y: -90, alpha: 0, scale: 4, duration: 900, onComplete: () => s.destroy() }); }); const t = txt(this, -80, -92, P3.nemShout, 24, '#c8303c', { st: 5, stroke: '#fff8e8' }); c.add(t); this.tweens.add({ targets: t, scale: 1.15, yoyo: true, repeat: -1, duration: 180 }); }
   exit() { if (this._leaving || this.going) return; this.going = true; this.final.setText(P3.final).setFontSize(30); this.btn.show(false); this.done.show(false); Audio.sfx('achieve'); this.time.delayedCall(2600, () => leave(this, 'Title')); }
 }
-Oracle.prototype.init = function init() { this.going = false; };
+Oracle.prototype.init = function init() { freshState(this); this.going = false; };

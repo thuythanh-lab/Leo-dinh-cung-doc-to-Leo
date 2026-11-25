@@ -18,7 +18,7 @@ export const forget = () => tx('readwrite', (s) => s.delete('custom'));
 /** The published default soundtrack, or null if unavailable. */
 export async function defaultSong(game) {
   if (!game.sound.context) return null;
-  try { const r = await fetch('assets/audio/music/main-theme.mp3'); if (!r.ok || !/audio/.test(r.headers.get('content-type') || '')) return null; return await game.sound.context.decodeAudioData(await r.arrayBuffer()); } catch { return null; }
+  try { const c = new AbortController(); const t = setTimeout(() => c.abort(), 180000); const r = await fetch('assets/audio/music/main-theme.mp3', { signal: c.signal }); r.ok || clearTimeout(t); if (!r.ok || !/audio/.test(r.headers.get('content-type') || '')) return null; const b = await r.arrayBuffer(); clearTimeout(t); return await game.sound.context.decodeAudioData(b); } catch { return null; }
 }
 /** {buffer, name} or null for "use the licensed tracks". name is set only for an imported MP3. */
 export async function loadTheme(game) {

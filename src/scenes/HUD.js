@@ -6,13 +6,14 @@ import { Save } from '../core/Save.js';
 import { Audio } from '../core/Audio.js';
 import { Controls as C } from '../core/Input.js';
 import { txt, panel, isTouch, onKey } from '../core/util.js';
+import { freshState, isOk, onUpdate } from '../core/stability.js';
 
 const W = 960; const H = 540;
 
 /** Screen-space UI over a level: hearts, coffee, assistant timer, toasts, dialogue, achievements, touch controls. */
 export default class HUD extends Phaser.Scene {
   constructor() { super('HUD'); }
-  init(d) { this.L = d.level; }
+  init(d) { const keep = this.pending; freshState(this); this.pending = keep || []; this.L = d.level; }
   create() {
     this.talking = false; this.ready = true; this.q = []; this.aq = []; this.showing = false; this.achShowing = false; this.pending = this.pending || [];
     this.hearts = [0, 1, 2].map((i) => this.add.sprite(34 + i * 42, 34, 'atlas', 'heart/0').setScale(3));
@@ -24,13 +25,13 @@ export default class HUD extends Phaser.Scene {
     this.makeTouch(); this.makeTop(); this.refresh();
     this.input.addPointer(3);
     const p = this.pending; this.pending = []; p.forEach((f) => f());
-    onKey(this, (e) => { if (this.talking && ['Enter', ' ', 'x', 'j', 'z', 'X', 'J', 'Z'].includes(e.key) && !e.repeat) this.advance(); if (this.onKey && ['Enter', ' ', 'x', 'j'].includes(e.key)) this.onKey(); });
+    onKey(this, (e) => { if (!isOk(e) && !(this.talking && e.code === 'Escape' && !e.repeat)) return; if (this.talking) this.advance(); else if (this.onKey) this.onKey(); });
     this.input.on('pointerdown', () => { if (this.talking) this.advance(); else if (this.onKey) this.onKey(); });
-    this.scale.on('resize', this.layoutTouch, this); this.events.once('shutdown', () => { this.scale.off('resize', this.layoutTouch, this); this.ready = false; this.talking = false; });
+    this.scale.on('resize', this.layoutTouch, this); this.events.once('shutdown', () => { this.scale.off('resize', this.layoutTouch, this); this.ready = false; this.talking = false; this.pending = []; this.sayDone = null; });
   }
   later(f) { if (this.ready && this.hearts) return f(); (this.pending = this.pending || []).push(f); }
   refresh() {
-    if (!this.ready || !this.hearts || !this.L.player) return; const h = this.L.player.hearts; this.hearts.forEach((s, i) => { const f = `heart/${i < h ? 0 : 1}`; if (s.frame.name !== f) { s.setFrame(f); this.tweens.add({ targets: s, scale: { from: 4.2, to: 3 }, duration: 220 }); } });
+    if (!this.ready || !this.hearts || !this.L || !this.L.player) return; const h = this.L.player.hearts; this.hearts.forEach((s, i) => { const f = `heart/${i < h ? 0 : 1}`; if (s.frame.name !== f) { s.setFrame(f); this.tweens.add({ targets: s, scale: { from: 4.2, to: 3 }, duration: 220 }); } });
     const c = `${Save.d.stats.coffee}`; if (this.cupT.text !== c) { this.cupT.setText(c); this.tweens.add({ targets: this.cup, scale: { from: 2.6, to: 2 }, duration: 160 }); }
     const ra = Save.d.assistant; [this.raIcon, this.raT].forEach((o) => o.setVisible(ra)); this.raKey.setVisible(ra && !this.touchOn); this.itemIcons.forEach(({ f, s, zone }) => { if (zone) s.setVisible(this.L.zone?.id === zone); const on = this.L.flag(f); if (on && s.tintTopLeft !== 0xffffff) this.tweens.add({ targets: s, scale: { from: 2.6, to: 1.7 }, duration: 300 }); on ? s.clearTint().setAlpha(1) : s.setTintFill(0xd8d0f0).setAlpha(0.28); });
     if (this.btn && this.btn.assist) this.btn.assist.setVisible(ra && this.touchOn);
@@ -54,13 +55,15 @@ export default class HUD extends Phaser.Scene {
   }
   banner(a, b, o = {}) { this.later(() => { const bar = this.add.rectangle(W / 2, H / 2 - 60, W, 124, 0x1c1428, 0.72).setScale(1, 0); const t = txt(this, W / 2, H / 2 - 80, a, 52, o.color || '#fff0a0', { head: true, st: 8 }).setAlpha(0); const s = txt(this, W / 2, H / 2 - 32, b, 26, '#e8dcf8').setAlpha(0); this.tweens.add({ targets: bar, scaleY: 1, duration: 260 }); this.tweens.add({ targets: [t, s], alpha: 1, x: { from: W / 2 - 40, to: W / 2 }, duration: 420, ease: 'Quad.out' }); this.tweens.add({ targets: [t, s, bar], alpha: 0, delay: o.ms || 2400, duration: 420, onComplete: () => [t, s, bar].forEach((q) => q.destroy()) }); }); }
   big(lines, o = {}) { // centred ceremony text
+    if (!this.ready) { this.later(() => this.big(lines, o)); return; }
     const out = []; let d = 0; lines.forEach((l, i) => { const t = txt(this, W / 2, (o.y || 170) + i * (i === 0 ? 0 : 44) + (i ? 24 : 0), l, i === 0 ? o.size || 62 : 32, i === 0 ? o.color || '#fff0a0' : '#fff6e0', { head: i === 0, st: i === 0 ? 10 : 6 }).setAlpha(0); this.tweens.add({ targets: t, alpha: 1, scale: { from: i ? 1 : 1.7, to: 1 }, delay: d, duration: 320, ease: 'Back.out' }); if (i) this.time.delayedCall(d, () => Audio.sfx('tick')); d += i === 0 ? 650 : 520; out.push(t); });
     const ms = o.ms || d + 1700; this.tweens.add({ targets: out, alpha: 0, delay: ms, duration: 400, onComplete: () => { out.forEach((t) => t.destroy()); o.done && o.done(); } });
   }
-  white(ms = 600, color = 0xfff6d0) { const r = this.add.rectangle(W / 2, H / 2, W, H, color, 1); this.tweens.add({ targets: r, alpha: 0, duration: ms, onComplete: () => r.destroy() }); }
-  death(a, b) { this.dd = [this.add.rectangle(W / 2, H / 2, W, H, 0x1c1428, 0.66).setAlpha(0), txt(this, W / 2, H / 2 - 24, a, 58, '#ff9a8a', { head: true, st: 8 }).setScale(1.6), txt(this, W / 2, H / 2 + 34, b, 26, '#d8d0e8')]; this.tweens.add({ targets: this.dd[0], alpha: 1, duration: 300 }); this.tweens.add({ targets: this.dd[1], scale: 1, duration: 260, ease: 'Back.out' }); }
+  white(ms = 600, color = 0xfff6d0) { if (!this.ready) return; const r = this.add.rectangle(W / 2, H / 2, W, H, color, 1); this.tweens.add({ targets: r, alpha: 0, duration: ms, onComplete: () => r.destroy() }); }
+  death(a, b) { if (!this.ready) return; this.dd = [this.add.rectangle(W / 2, H / 2, W, H, 0x1c1428, 0.66).setAlpha(0), txt(this, W / 2, H / 2 - 24, a, 58, '#ff9a8a', { head: true, st: 8 }).setScale(1.6), txt(this, W / 2, H / 2 + 34, b, 26, '#d8d0e8')]; this.tweens.add({ targets: this.dd[0], alpha: 1, duration: 300 }); this.tweens.add({ targets: this.dd[1], scale: 1, duration: 260, ease: 'Back.out' }); }
   deathEnd() { (this.dd || []).forEach((d) => d.destroy()); this.dd = null; }
   complete(clean, done) {
+    if (!this.ready) { done(); return; }
     const bar = this.add.rectangle(W / 2, 210, W, 180, 0x1c1428, 0.75).setScale(1, 0); this.tweens.add({ targets: bar, scaleY: 1, duration: 250 }); const t = txt(this, W / 2, 176, UI.complete, 70, '#fff0a0', { head: true, st: 10 }).setScale(0); this.tweens.add({ targets: t, scale: 1, duration: 420, ease: 'Back.out' }); txt(this, W / 2, 234, `${this.L.def.name}${clean ? '   ·   no sanity lost (suspicious)' : ''}`, 28); const n = txt(this, W / 2, 276, '', 22, '#c8bce0');
     let ok = false; const go = () => { if (!ok || this.gone2) return; if (this.achShowing || this.aq.length) return; this.gone2 = true; this.onKey = null; done(); }; this.time.delayedCall(1500, () => { ok = true; n.setText('▸ press jump / tap'); this.onKey = go; }); this.gone2 = false;
     this.time.addEvent({ delay: 500, loop: true, callback: () => { if (ok && this.time.now > this.autoAt) go(); } }); this.autoAt = this.time.now + 6500;
@@ -69,7 +72,7 @@ export default class HUD extends Phaser.Scene {
   // ---------------------------------------------------------------- achievements
   achievement(id) { this.later(() => { this.aq.push(id); this.nextAch(); }); }
   nextAch() {
-    if (this.achShowing || !this.aq.length) return; const a = byId[this.aq.shift()]; this.achShowing = true; const main = a.main; const w = main ? 640 : 480; const h = main ? 130 : 96; const x = W / 2; const y = H - (main ? 110 : 80);
+    if (this.achShowing || !this.aq.length) return; const a = byId[this.aq.shift()]; if (!a) return; this.achShowing = true; const main = a.main; const w = main ? 640 : 480; const h = main ? 130 : 96; const x = W / 2; const y = H - (main ? 110 : 80);
     const c = this.add.container(x, H + 120).setDepth(50); const p = panel(this, 0, 0, w, h, main ? 'panel_hot' : 'panel_dark'); const ic = this.add.sprite(-w / 2 + (main ? 74 : 56), 0, 'atlas', `icon_${a.icon}/0`).setScale(main ? 2.6 : 2);
     const l = -w / 2 + (main ? 136 : 106); const t0 = txt(this, l, main ? -40 : -30, a.banner || 'ACHIEVEMENT UNLOCKED', main ? 20 : 18, '#fff0a0', { ox: 0 }); const t1 = txt(this, l, main ? -8 : -4, a.head || a.title, main ? (a.head && a.head.length > 30 ? 28 : 32) : 26, '#ffffff', { ox: 0, head: true, st: 5 }); const t2 = txt(this, l, main ? 30 : 26, a.sub, main ? 25 : 21, '#ffe0f0', { ox: 0 }); c.add([p, ic, t0, t1, t2]); const maxW = w - (main ? 160 : 124); [t1, t2].forEach((q) => { if (q.width > maxW) q.setScale(maxW / q.width); });
     Audio.sfx(main ? 'achieve' : 'secret');
@@ -81,8 +84,10 @@ export default class HUD extends Phaser.Scene {
 
   // ---------------------------------------------------------------- dialogue
   say(lines, done) { this.later(() => { this.lines = lines.slice(); this.sayDone = done; this.talking = true; if (!this.box) { this.box = this.add.container(W / 2, H - 92).setDepth(40); const p = panel(this, 0, 0, 800, 140, 'panel_paper'); this.pf = panel(this, -324, 0, 104, 104, 'panel_dark'); this.face = this.add.sprite(-324, 0, 'atlas', 'face_leo/0').setScale(3.6); this.nameT = txt(this, -254, -44, '', 24, '#8f3848', { ox: 0, st: 0, head: true }); this.sayT = txt(this, -254, -24, '', 28, '#3a2418', { ox: 0, oy: 0, align: 'left', st: 0, wrap: 620, ls: -4 }); this.arrow = this.add.sprite(368, 48, 'atlas', 'arrowdn/0').setScale(1.6); this.noteT = txt(this, 384, 80, FICTION_NOTE, 16, '#e8dcc8', { ox: 1 }); this.box.add([p, this.pf, this.face, this.nameT, this.sayT, this.arrow, this.noteT]); } this.box.setVisible(true).setScale(1, 0.1); this.tweens.add({ targets: this.box, scaleY: 1, duration: 160 }); Audio.sfx('bookopen', { v: 0.5 }); this.line(); }); }
-  line() { const [who, s] = this.lines.shift(); this.face.play(`face_${who}`); this.nameT.setText(NAMES[who] || who); this.noteT.setVisible(['margreet', 'donna', 'star'].includes(who)); this.full = s; this.n = 0; this.sayT.setText(''); this.arrow.setVisible(false); clearInterval(this.ty); this.lineAt = this.time.now; this.tyEv && this.tyEv.remove(); this.tyEv = this.time.addEvent({ delay: 24, repeat: s.length - 1, callback: () => { this.n++; this.sayT.setText(s.slice(0, this.n)); if (this.n % 2) Audio.sfx('text'); if (this.n >= s.length) this.arrow.setVisible(true); } }); }
-  advance() { if (!this.talking || this.time.now - this.lineAt < 120) return; if (this.n < this.full.length) { this.tyEv.remove(); this.n = this.full.length; this.sayT.setText(this.full); this.arrow.setVisible(true); return; } if (this.lines.length) { Audio.sfx('page', { v: 0.4 }); this.line(); } else { this.talking = false; this.box.setVisible(false); Audio.sfx('bookclose', { v: 0.4 }); C.clear(); const d = this.sayDone; this.sayDone = null; d && d(); } }
+  line() { const [who, s] = this.lines.shift(); this.face.play(`face_${who}`); this.nameT.setText(NAMES[who] || who); this.noteT.setVisible(['margreet', 'donna', 'star'].includes(who)); this.full = s; this.n = 0; this.sayT.setText(''); this.arrow.setVisible(false); this.lineAt = this.time.now; this.tyEv && this.tyEv.remove(); this.tyEv = this.time.addEvent({ delay: 24, repeat: Math.max(0, s.length - 1), callback: () => { this.n++; this.sayT.setText(s.slice(0, this.n)); if (this.n % 2) Audio.sfx('text'); if (this.n >= s.length) this.arrow.setVisible(true); } }); }
+  advance() { if (!this.talking || this.time.now - this.lineAt < 120) return; if (this.n < this.full.length) { this.tyEv.remove(); this.n = this.full.length; this.sayT.setText(this.full); this.arrow.setVisible(true); return; } if (this.lines.length) { Audio.sfx('page', { v: 0.4 }); this.line(); } else { this.talking = false; this.box.setVisible(false); Audio.sfx('bookclose', { v: 0.4 }); C.clear(); const d = this.sayDone; this.sayDone = null; try { d && d(); } finally { this.L && this.L.dialogueEnded && this.L.dialogueEnded(); } } }
+  /** Close any dialogue without losing what it unlocks. */
+  closeTalk() { if (!this.talking) return; this.tyEv && this.tyEv.remove(); this.lines = []; this.n = this.full ? this.full.length : 0; this.lineAt = -1e9; this.advance(); }
 
   // ---------------------------------------------------------------- top-right + touch
   makeTop() {
@@ -98,7 +103,7 @@ export default class HUD extends Phaser.Scene {
       if (!this.touchOn) return; const on = {}; for (const p of this.input.manager.pointers) { if (!p.isDown) continue; for (const [k, s] of Object.entries(this.btn)) { if (!s.visible) continue; const r = (s.displayWidth / 2) * 1.18; if (Math.hypot(p.x - s.x, p.y - s.y) < r) on[k] = true; } }
       for (const k of Object.keys(this.btn)) { C.touch[k] = !!on[k]; this.btn[k].setAlpha(on[k] ? 1 : 0.72); } if (on.up) C.touch.up = true;
     };
-    this.events.on('update', upd);
+    onUpdate(this, upd);
   }
   layoutTouch() {}
 }

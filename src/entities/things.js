@@ -23,7 +23,7 @@ export { Ent, overlap };
 export class Coffee extends Ent {
   constructor(L, tx, ty) { super(L, tx, ty, 'coffee', 0, 10, 0.5); this.play({ key: 'coffee', startFrame: (tx * 3) % 4 | 0 }); }
   update() {
-    if (this.dead || !this.hits(-2)) return; const s = Save.d.stats; s.coffee++; Audio.sfx('coffee', { rate: 1 + ((this.L.combo = this.L.clock - (this.L.comboT || 0) < 900 ? Math.min(8, (this.L.combo || 0) + 1) : 0) * 0.04) }); this.L.comboT = this.L.clock;
+    if (this.dead || !this.L.player.alive || !this.hits(-2)) return; const s = Save.d.stats; s.coffee++; Audio.sfx('coffee', { rate: 1 + ((this.L.combo = this.L.clock - (this.L.comboT || 0) < 900 ? Math.min(8, (this.L.combo || 0) + 1) : 0) * 0.04) }); this.L.comboT = this.L.clock;
     this.L.fx.spark(this.x, this.y); if (s.coffee >= COFFEE.caffeineGoal) this.L.unlock('caffeine'); this.L.hud.refresh(); this.kill();
   }
 }
@@ -34,7 +34,7 @@ export class Special extends Ent {
 /** Generic quest item. o: {flag, onGet, glow} */
 export class Item extends Ent {
   constructor(L, tx, ty, name, o = {}) { super(L, tx, ty, name, 0, 12, 0.5); this.o = o; if (L.anims.exists(name)) this.play(name); this.hy = this.y; this.gl = L.fx.glow(this.x, this.y, o.glow || 'w', 0.6, 9, 0.6); if (o.flag && L.flag(o.flag)) { this.gl.destroy(); this.kill(); } }
-  update() { if (this.dead) return; this.y = this.hy + Math.sin(this.L.clock / 350) * 3; this.gl.setPosition(this.x, this.y); if (this.hits(1) && !this.L.cinematic) { if (this.o.flag) this.L.setFlag(this.o.flag); this.L.fx.sparkle(this.x, this.y, 8, 18); this.L.fx.ring(this.x, this.y, 0xfff0a0, 1.2); Audio.sfx('special'); this.gl.destroy(); const f = this.o.onGet; this.kill(); f && f(); } }
+  update() { if (this.dead) return; this.y = this.hy + Math.sin(this.L.clock / 350) * 3; this.gl.setPosition(this.x, this.y); if (this.hits(1) && !this.L.cinematic && this.L.player.alive) { if (this.o.flag) this.L.setFlag(this.o.flag); this.L.fx.sparkle(this.x, this.y, 8, 18); this.L.fx.ring(this.x, this.y, 0xfff0a0, 1.2); Audio.sfx('special'); this.gl.destroy(); const f = this.o.onGet; this.kill(); f && f(); } }
 }
 
 // ------------------------------------------------------------------ interactables

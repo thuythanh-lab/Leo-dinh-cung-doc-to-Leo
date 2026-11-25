@@ -32,12 +32,12 @@ export default {
   ridge(k, L) {
     [[7, 'b_tall', 4], [20, 'shelf_small', 0], [41, 'shelf_small', 0]].forEach(([x, n, f]) => k.prop(x, G, n, { f, d: 1 })); k.prop(24, G, 'b_lectern', { d: 3 }); k.prop(44, G, 'mtgate', { d: 1 }); [[10, G], [36, G]].forEach(([x, y]) => k.prop(x, y, 'lamp', { d: 2, glow: 'w', gy: 0.85 }));
     k.sign(6, G, 'p3door'); k.machine(9, G); k.row(12.4, G - 4.2, 4); k.row(16, G - 1, 3); const sup = k.prop(31, G, 'sup', { d: 12, anim: false, flip: true }); k.prop(32.6, G, 'b_lectern', { d: 11 });
-    const th = L.add.image(0, 0, 'atlas', 'thesis/0').setScale(0.5).setDepth(21); L.ents.push({ update: () => { if (!th.held && th.active) th.setPosition(L.player.x + L.player.face * 10, L.player.y - 13); } }); if (L.flag('notbad')) th.setVisible(false);
+    const p0 = () => L.player; const th = L.add.image(0, 0, 'atlas', 'thesis/0').setScale(0.5).setDepth(21); L.ents.push({ update: () => { if (!th.held && th.active) th.setPosition(L.player.x + L.player.face * 10, L.player.y - 13); } }); if (L.flag('notbad')) th.setVisible(false);
     const portal = k.prop(42, G + 0.2, 'portal', { d: 8 }).setVisible(L.flag('notbad'));
-    L.ents.push({ update: () => { if (portal.visible && !L.cinematic && !L.teleporting && L.zone.id === 'ridge' && Math.abs(L.player.x - portal.x) < 16) { Audio.sfx('laser'); L.teleport(4, A, () => { L.setCheckpoint(L.player.x, L.player.y); }, 350); } } });
+    L.ents.push({ update: () => { if (portal.visible && p0().alive && !L.cinematic && !L.teleporting && L.zone.id === 'ridge' && Math.abs(L.player.x - portal.x) < 16) { Audio.sfx('laser'); L.teleport(4, A, () => { L.setCheckpoint(L.player.x, L.player.y); }, 350); } } });
     L.trigger(26, G - 8, 18, 8.2, () => {
       if (L.flag('notbad') || L.cinematic) return; const p = L.player; L.lock(true); p.body.reset(28 * T, p.y); p.face = 1; p.forceAnim = 'leo_stare'; L.cameras.main.pan(29.6 * T, (G - 4) * T, 700, 'Sine.easeInOut'); L.cameras.main.stopFollow();
-      L.hud.say(P3.supTalk, () => {
+      L.say(P3.supTalk, () => { L.lock(true);
         th.held = true; th.setDepth(30); L.tweens.add({ targets: th, x: sup.x - 12, y: sup.y - 18, duration: 800, ease: 'Sine.inOut' }); Audio.music(L, null, 700); sup.setFrame('sup/1');
         const at = (ms, f) => L.wait(ms, f); P3.reading.forEach((s, i) => at(1500 + i * 1500, () => { L.float(sup.x, sup.y - 54, s, '#e8dcf8', 1300); Audio.sfx('page'); sup.setFrame(`sup/${i % 2 ? 2 : 1}`); if (i > 2) p.forceAnim = 'leo_sit'; }));
         const q = 1500 + P3.reading.length * 1500; at(q, () => { sup.setFrame('sup/0'); L.cameras.main.zoomTo(2.6, 3200, 'Sine.easeInOut'); p.forceAnim = 'leo_stare'; }); [700, 1700, 2700].forEach((d) => at(q + d, () => Audio.sfx('tick')));

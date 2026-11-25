@@ -94,7 +94,7 @@ export const ENDING = {
 };
 
 export const UI = {
-  paused: 'PAUSED', pausedSub: 'Your supervisor has noticed.', resume: 'Resume', restart: 'Restart level', map: 'World map', settings: 'Settings', cv: 'Academic CV', title: 'Title screen',
+  paused: 'PAUSED', pausedSub: 'Your supervisor has noticed.', resume: 'Resume', unstick: 'Unstick (last coffee machine)', restart: 'Restart level', map: 'World map', settings: 'Settings', cv: 'Academic CV', title: 'Title screen',
   music: 'Music', sfx: 'Sound effects', full: 'Fullscreen', touch: 'Touch controls', auto: 'Auto', on: 'On', off: 'Off', back: 'Back', mapHint: 'Choose a destination. Enter / tap to travel.', skip: 'Skip ▸',
   cvTitle: 'ACADEMIC CV', cvName: 'Léo, PhD candidate', cvMain: 'Milestones', cvSecret: 'Footnotes (secret)', cvLocked: '???', cvLast: 'The Đốc Tờ Era', cvHint: 'Not yet peer reviewed.', cvPubs: 'Publications', complete: 'LEVEL COMPLETE', rotate: 'Best played in landscape.',
   controls: 'Move: Arrows / WASD    Jump: Space    Slide: Down while running\nMagic pen + interact: X or J    Assistant: E    Pause: Esc',

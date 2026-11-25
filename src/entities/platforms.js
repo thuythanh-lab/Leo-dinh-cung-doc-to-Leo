@@ -124,6 +124,6 @@ export class Beetle extends Plat {
 /** Platform that falls away (funding collapse, major revision). */
 export class Collapse extends Plat {
   constructor(L, tx, ty, name, o = {}) { super(L, tx, ty, name, o); }
-  collapse(delay = 0) { if (this.fallen) return; this.fallen = true; this.L.time.delayedCall(delay, () => { this.setSolid(false); this.L.fx.burst('brick', this.x, this.y, 5, 80); this.L.tweens.add({ targets: this, y: this.y + 160, angle: Math.random() * 80 - 40, alpha: 0, duration: 800, ease: 'Quad.in' }); Audio.sfx('break'); }); }
+  collapse(delay = 0) { if (this.fallen) return; this.fallen = true; const id = (this.fallId = (this.fallId || 0) + 1); this.L.time.delayedCall(delay, () => { if (!this.fallen || id !== this.fallId || !this.active) return; this.setSolid(false); this.L.fx.burst('brick', this.x, this.y, 5, 80); this.L.tweens.add({ targets: this, y: this.y + 160, angle: Math.random() * 80 - 40, alpha: 0, duration: 800, ease: 'Quad.in' }); Audio.sfx('break'); }); }
   restore(x = this.hx, y = this.hy) { this.fallen = false; this.L.tweens.killTweensOf(this); this.body.reset(x, y); this.setAngle(0).setAlpha(0).setVisible(true); this.setSolid(true); this.L.tweens.add({ targets: this, alpha: 1, duration: 300 }); this.L.fx.sparkle(x, y, 5, 18); }
 }

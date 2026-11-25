@@ -65,7 +65,7 @@ export default {
     // crisis room interior
     k.prop(17, 46.6, 'bigwindow', { d: 1 }); k.prop(6, 50, 'b_tall', { f: 3, d: 2 }); k.prop(26, 50, 'b_tall', { f: 8, d: 2 }); k.prop(23, 50, 'shelf_small', { d: 2 }); k.prop(8.5, 43, 'b_portrait', { f: 2 });
     k.door(3, 50, { to: { x: 97, y: 28 } }); L.fx.glow(17 * T, 44 * T, 'w', 2.2, 2, 0.35);
-    let sat = false; k.use(17, 50, 'chair', { range: 18, disabled: () => sat, use: () => { sat = true; L.lock(true); const p = L.player; p.setPosition(17 * T, 50 * T); p.face = -1; p.setFlipX(true); p.forceAnim = 'leo_sit'; Audio.music(L, 'nature'); L.wait(1200, () => L.hud.big([TOAST.crisis], { y: 150, size: 52, color: '#d8ffd0', ms: 3600, done: () => { p.heal(1); Audio.sfx('special'); L.fx.sparkle(p.x, p.y - 14, 8, 18); p.forceAnim = null; L.lock(false); } })); } });
+    let sat = false; k.use(17, 50, 'chair', { range: 18, disabled: () => sat, use: () => { sat = true; L.lock(true); const p = L.player; p.setPosition(17 * T, 50 * T); p.face = -1; p.setFlipX(true); p.forceAnim = 'leo_sit'; Audio.music(L, 'nature'); L.wait(1200, () => L.hud.big([TOAST.crisis], { y: 150, size: 52, color: '#d8ffd0', ms: 3600 })); L.wait(5200, () => { p.heal(1); Audio.sfx('special'); L.fx.sparkle(p.x, p.y - 14, 8, 18); p.forceAnim = null; L.lock(false); }); } });
     k.prop(17, 51, 'ring', { a: 0 });
   },
 };

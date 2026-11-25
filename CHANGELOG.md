@@ -2,6 +2,15 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V3.1 - Stability
+- Fixed: dialogue froze the game from the second level visit in a session (destroyed dialogue box reused)
+- Fixed: one error stopped the frame loop for good; the loop now survives and a level that keeps failing restarts at its checkpoint
+- Fixed: the dissertation could not be assembled a second time; an interrupted framework ceremony blocked Level 2
+- Fixed: one key press could close and reopen dialogue; F and Vietnamese input methods could not advance it; keys released during pause stuck
+- Fixed: Start waited for the music download; triggers and pickups fired during death or cinematics; listeners piled up; error when walking past the last map node
+- Damaged saves, blocked storage, missing sounds and failed artwork are handled; "Unstick" added to the pause menu
+- New tests: repro, session, stress, soak, failures
+
 ## V3.0.1 - Continue fix
 - Continuing a saved Level 1 or 5 after breaking the Writer's Block no longer shows a black screen; existing saves work again
 - New tests rebuild every level from every saved state

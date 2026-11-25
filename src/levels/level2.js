@@ -2,6 +2,7 @@ import { kit, T, TOAST, Audio } from './kit.js';
 import { TALK, BIG } from '../config/text.js';
 
 const HUB = { x: 23, y: 17 };
+const GARDEN_LEDGE = 11; // reachable from the nearby leaf without the full timed lift sequence
 export default {
   id: 2, name: 'The Hall of Legendary Scholars', sub: 'Please be quiet. The theory is sleeping.', w: 150, h: 56, spawn: { x: 4, y: 17 },
   hudItems: [['em_water', 'emblem_water'], ['em_ent', 'emblem_ent'], ['em_infra', 'emblem_infra']],
@@ -18,7 +19,7 @@ export default {
     b.fill(W + 28, 12, 19, 13); b.cut(W + 28, 21, 15, 4); b.cut(W + 40, 8, 3, 14); b.fill(W + 43, 9, 4, 16);
     b.fill(W + 25, 4, 10, 1); b.cut(W + 28, 25, 0, 0);
     // --- garden (offset 0,30)
-    const G = 30; b.fill(0, G, 1, 20); b.fill(71, G, 1, 20); b.ground(1, 13, G + 14, 50); b.ground(14, 25, G + 18, 50); b.haz(14, G + 17, 12); b.ground(26, 34, G + 14, 50); b.ground(35, 53, G + 18, 50); b.haz(35, G + 17, 19); b.ground(54, 58, G + 14, 50); b.ground(59, 63, G + 15, 50); b.ground(64, 71, G + 6, 50); b.fill(64, G, 8, 1);
+    const G = 30; b.fill(0, G, 1, 20); b.fill(71, G, 1, 20); b.ground(1, 13, G + 14, 50); b.ground(14, 25, G + 18, 50); b.haz(14, G + 17, 12); b.ground(26, 34, G + 14, 50); b.ground(35, 53, G + 18, 50); b.haz(35, G + 17, 19); b.ground(54, 58, G + 14, 50); b.ground(59, 63, G + 15, 50); b.ground(64, 71, G + GARDEN_LEDGE, 50); b.fill(64, G, 8, 1);
     // --- archives (offset 74,30)
     const A = 74; b.fill(A, 30, 1, 22); b.fill(A + 59, 30, 1, 22); b.ground(A + 1, A + 9, 42, 52); b.ground(A + 21, A + 27, 42, 52); b.ground(A + 33, A + 39, 37, 52); b.ground(A + 51, A + 59, 40, 52);
     // --- rabbit hole
@@ -79,7 +80,7 @@ export default {
     this.encounter(k, L, { who: 'margreet', talk: 'margreet', flag: 'em_water', emblem: 'emblem_water', x: X + 33, y: 4, flip: true, glow: 'c', tx: X + 29, ty: 0, tw: 5, th: 4.1, dx: X + 27.5, dy: 4 });
   },
   garden(k, L) {
-    const G = 30; k.prop(6, G + 14.2, 'shroom_1', { d: 1 }); k.prop(31, G + 14.2, 'shroom_0', { d: 1 }); k.prop(12, G + 14.2, 'tree_p', { d: 1 }); k.prop(57, G + 14.2, 'tree_p', { d: 1 }); k.prop(69, G + 6.2, 'tree_p', { d: 1 }); k.prop(28, G + 14, 'shroom_2', { d: 2 }); k.prop(50, G + 18, 'shroom_1', { d: 1 }); k.prop(40, G + 18, 'shroom_0', { d: 1 });
+    const G = 30; k.prop(6, G + 14.2, 'shroom_1', { d: 1 }); k.prop(31, G + 14.2, 'shroom_0', { d: 1 }); k.prop(12, G + 14.2, 'tree_p', { d: 1 }); k.prop(57, G + 14.2, 'tree_p', { d: 1 }); k.prop(69, G + GARDEN_LEDGE + 0.2, 'tree_p', { d: 1 }); k.prop(28, G + 14, 'shroom_2', { d: 2 }); k.prop(50, G + 18, 'shroom_1', { d: 1 }); k.prop(40, G + 18, 'shroom_0', { d: 1 });
     [[9, 8], [20, 5], [38, 6], [47, 4], [60, 4]].forEach(([x, y], i) => { const s = k.prop(x, G + y, i % 2 ? 'gearbig' : 'gearsm', { oy: 0.5, d: 0, a: 0.75 }); L.ents.push({ update: (dt) => { s.rotation += dt * (i % 2 ? 0.0004 : -0.0007); } }); }); [[4, 10], [18, 12], [33, 9], [45, 10], [62, 8]].forEach(([x, y]) => { const m = k.prop(x, G + y, 'b_moth', { d: 12, oy: 0.5 }); L.tweens.add({ targets: m, x: m.x + 50, y: m.y - 26, yoyo: true, repeat: -1, duration: 3200 + x * 40, ease: 'Sine.inOut' }); });
     k.door(2.5, G + 14, { to: { x: 51, y: 12 } }); k.sign(6, G + 14, 'garden');
     // 1: pods -> leaves
@@ -94,7 +95,7 @@ export default {
     // 3: entangled platforms
     const a = k.linked(60, G + 14, 'plat_leaf', { thread: 0xff9ad0, sink: 0.6 }); const bb = k.linked(62.4, G + 13.6, 'plat_leaf', { lift: 2.6, thread: 0xff9ad0, sink: 0.5 }); const c = k.linked(60, G + 13, 'plat_leaf', { lift: 4.8, thread: 0x8ff0ff, sink: 0.4, lifter: bb }); a.partner = bb; bb.partner = a; c.partner = null; c.hx = 59.9 * T; c.x = c.hx;
     k.coffee([62.4, G + 9.5], [60, G + 6.8]);
-    this.encounter(k, L, { who: 'donna', talk: 'donna', flag: 'em_ent', emblem: 'emblem_ent', x: 69, y: G + 6, flip: true, glow: 'g', tx: 65, ty: G, tw: 5, th: 6.2, dx: 66.3, dy: G + 6 });
+    this.encounter(k, L, { who: 'donna', talk: 'donna', flag: 'em_ent', emblem: 'emblem_ent', x: 69, y: G + GARDEN_LEDGE, flip: true, glow: 'g', tx: 65, ty: G + GARDEN_LEDGE - 6, tw: 5, th: 6.2, dx: 66.3, dy: G + GARDEN_LEDGE });
   },
   archive(k, L) {
     const A = 74; k.door(A + 3, 42, { to: { x: 30, y: 8 } }); k.sign(A + 5.4, 42, 'archive'); [[A + 8, 42], [A + 22, 42], [A + 35, 37], [A + 55, 40]].forEach(([x, y]) => k.prop(x, y, 'b_console', { d: 2 }));

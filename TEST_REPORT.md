@@ -29,3 +29,6 @@ Levels 1, 2 and 4 completed. On levels 3 and 5 the bot script lost its route aft
 - "Professional Delegator" (three summons) has no end-to-end test.
 - Estimated first play is longer than the 7 to 10 minute target (bot time about 10 minutes with secrets).
 - Debug links such as `?level=3` work on the public site and skip progression.
+
+# Phase 2 (25 November 2026)
+On the deployed site: level 6 completed by the bot in 105 s; levels 1 to 5 completed again; `tests/phase2.mjs` and `tests/system.mjs` all passed; all scenes load. On the local production build: level 6 also completed with damage on, by the bridge and by the gorge detour. Music: `tests/audio.mjs` passed locally with the local theme and with the licensed fallback. Not judged by a human: feel, difficulty, sound. No physical phone, Safari or Firefox.

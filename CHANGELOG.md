@@ -2,6 +2,11 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V2.1 - Local main theme
+- On this computer only, the world map theme (also the conference break) can be replaced by a local MP3 with a blended loop; it resumes instead of restarting
+- The MP3 is not published: redistribution rights are not confirmed, so the public site keeps the licensed track
+- Fixed: a track whose scene closed before it finished loading could be skipped later
+
 ## V2.0 - Phase 2: The Fieldwork Survival Era
 - Level 6: Into the Field and The Dissertation Era, joined by a portal
 - Flooding river, landslide, water buffalo, collapsing rope bridge with a lower detour

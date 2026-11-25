@@ -2,6 +2,10 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V0.6 - Funding Hunger Games
+- Funding collapse and three application sections
+- Funding portal finale, Conference Buffet
+
 ## V0.5 - Q1 Publication Tower
 - Rejection letters, major revision, paywall
 - The Editorial Machine

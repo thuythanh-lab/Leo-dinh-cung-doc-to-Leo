@@ -2,6 +2,11 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V1.0 - Phase 1 complete and tested
+- Automated playthrough and system tests
+- GitHub Actions deployment
+- Design documentation
+
 ## V0.9 - Cinematics, audio and visual polish
 - Opening and Phase 1 ending cinematics
 

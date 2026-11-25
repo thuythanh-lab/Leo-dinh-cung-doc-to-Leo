@@ -34,6 +34,6 @@ Levels 1, 2 and 4 completed. On levels 3 and 5 the bot script lost its route aft
 On the deployed site: level 6 completed by the bot in 105 s; levels 1 to 5 completed again; `tests/phase2.mjs` and `tests/system.mjs` all passed; all scenes load. On the local production build: level 6 also completed with damage on, by the bridge and by the gorge detour. Music: `tests/audio.mjs` passed locally with the local theme and with the licensed fallback. Not judged by a human: feel, difficulty, sound. No physical phone, Safari or Firefox.
 
 # Complete game, v3.0 (deployed site)
-Levels 1 to 7 completed by the bot (invulnerable), level 7 also with damage on. `finale.mjs`, `phase2.mjs`, `system.mjs`, `soundtrack.mjs`, `audio.mjs` and scene load checks all passed. Level 7 took the bot 63 s including the supervisor scene; the Reviewer #2 fight took 34 s. One page load timed out during a parallel run and passed on rerun.
+Levels 1 to 7 completed by the bot (invulnerable). Level 7 was also completed with damage on, on the local production build only. `finale.mjs`, `phase2.mjs`, `system.mjs`, `soundtrack.mjs`, `audio.mjs` and scene load checks all passed. Level 7 took the bot 63 s including the supervisor scene; the Reviewer #2 fight took 25 to 34 s. The level 7 page load timed out several times on a slow connection before completing.
 
 Not tested: human play, sound by ear, physical phones, Safari, Firefox. Levels 3 and 5 are still unproven end to end with damage on.

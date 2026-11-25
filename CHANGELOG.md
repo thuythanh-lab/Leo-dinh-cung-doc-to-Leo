@@ -2,6 +2,10 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V0.5 - Q1 Publication Tower
+- Rejection letters, major revision, paywall
+- The Editorial Machine
+
 ## V0.4 - Three legendary scholar encounters
 - Water & Power Observatory
 - Garden of Entangled Worlds

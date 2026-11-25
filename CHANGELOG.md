@@ -2,6 +2,10 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V0.7 - Bureaucratic Labyrinth
+- Three stamps and CÔNG VĂN walls
+- The Guardian of the Official Stamp
+
 ## V0.6 - Funding Hunger Games
 - Funding collapse and three application sections
 - Funding portal finale, Conference Buffet

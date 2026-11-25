@@ -3,6 +3,8 @@
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
 ## V1.0 - Phase 1 complete and tested
+- Verified on the live GitHub Pages URL; GitHub Actions publishes to gh-pages
+- Share metadata, final test report
 - Automated playthrough and system tests
 - GitHub Actions deployment
 - Design documentation

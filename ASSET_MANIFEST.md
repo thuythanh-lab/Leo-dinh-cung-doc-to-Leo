@@ -20,7 +20,5 @@ Pack licence texts are in `public/assets/licenses/`. To rebuild assets, set `LEO
 New art is original, drawn by `tools/art/phase2.py` and appended to the atlas; Phase 1 atlas pixels are unchanged. Music and sound effects reuse the existing tracks and the Kenney RPG Audio and Interface Sounds packs. Nothing was downloaded. `tools/art/build.py` rewrites the atlas, so run `phase2.py` after it.
 
 ## Local-only audio (not redistributed)
-`assets/audio/Harry Potter Hedwig s Song HQ.mp3`: redistribution rights not confirmed. Git-ignored, never copied to `dist`, served only by the local Vite servers. Public soundtrack: `wizard.mp3`.
+`assets/audio/Harry Potter Hedwig s Song HQ.mp3`: redistribution rights not confirmed. Git-ignored, never copied to `dist`, served only by the local Vite servers. Public default: the licensed level tracks.
 
-## Original music
-`public/assets/audio/music/wizard.mp3`, "Waltz for an Unfinished Thesis": composed for this game and synthesised by `tools/audio/wizard.py` (no samples). The earlier level tracks stay as a fallback if it cannot load.

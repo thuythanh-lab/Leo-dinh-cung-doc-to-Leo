@@ -26,6 +26,12 @@ export class Boot extends Phaser.Scene {
   }
 }
 
+/** Open the device file picker and import the chosen MP3. done(message, isProblem, isPlaying). Must run inside a click or key press. */
+function pickMp3(start, done) {
+  document.getElementById('leo-song')?.remove(); const el = document.createElement('input'); el.type = 'file'; el.accept = '.mp3,audio/mpeg,audio/mp3'; el.id = 'leo-song'; el.style.display = 'none'; document.body.appendChild(el);
+  el.onchange = () => { const f = el.files[0]; el.remove(); if (!f) return; start(); Audio.choose(f).then((ok) => done(ok ? PM.saved : PM.unsaved, !ok, true), (e) => done(Object.values(PM).includes(e.message) ? e.message : PM.failed, true, false)); }; el.click();
+}
+
 /** Keyboard + pointer vertical menu. */
 class Menu {
   constructor(scene, x, y, items, o = {}) {
@@ -63,11 +69,17 @@ export class TitleUI extends Phaser.Scene {
     const t1 = txt(this, W / 2, 84, TITLE.line1, 82, '#fff6d8', { head: true, st: 14, stroke: '#3a2148' }); const t2 = txt(this, W / 2, 168, TITLE.line2, 94, '#ffd24a', { head: true, st: 16, stroke: '#5a1f2a' }); [t1, t2].forEach((t, i) => { t.setShadow(0, 7, '#1c1428', 0, true, false); const y = t.y; t.y = -90; this.tweens.add({ targets: t, y, duration: 900, delay: 200 + i * 220, ease: 'Bounce.out', onComplete: () => this.tweens.add({ targets: t, y: y - 5, yoyo: true, repeat: -1, duration: 1700, delay: i * 300, ease: 'Sine.inOut' }) }); });
     const sub = txt(this, W / 2, 238, TITLE.sub, 30, '#ffffff', { st: 6 }).setAlpha(0); this.tweens.add({ targets: sub, alpha: 1, delay: 1400, duration: 500 });
     const go = (k, d) => { this.menu.enabled = false; const t = this.scene.get('Title'); fadeTo(t, k, d, 500); this.cameras.main.fadeOut(500, 20, 14, 30); };
-    const start = () => { Save.reset(); Save.d.started = true; Save.save(); go('Intro'); }; const prog = Save.hasProgress(); const cv = Object.keys(Save.d.ach).length > 0;
-    this.menu = new Menu(this, 250, 304, [{ label: TITLE.start, go: () => (prog ? this.confirm(start) : start()) }, { label: TITLE.cont, off: !prog, go: () => (Save.d.run && Save.d.run.cp ? go('Level', { level: Save.d.run.level }) : go('Map')) }, { label: TITLE.cv, off: !cv, go: () => go('CV', { back: 'Title' }) }, { label: TITLE.settings, go: () => { this.menu.enabled = false; this.scene.launch('Settings', { back: 'TitleUI' }); this.scene.bringToTop('Settings'); } }], { gap: 56 }); if (prog) { this.menu.i = 1; this.menu.draw(); }
-    this.events.on('resumeMenu', () => { this.menu.enabled = true; }); txt(this, W - 12, H - 16, TITLE.hint, 20, '#e8f0ff', { ox: 1 }); this.cameras.main.fadeIn(600, 20, 14, 30);
+    const start = () => Audio.loading.then(() => (Audio.theme ? begin() : this.askSong(begin))); const begin = () => { Save.reset(); Save.d.started = true; Save.save(); go('Intro'); }; const prog = Save.hasProgress(); const cv = Object.keys(Save.d.ach).length > 0;
+    this.menu = new Menu(this, 250, 304, [{ label: TITLE.start, go: () => (prog ? this.confirm(start) : start()) }, { label: TITLE.cont, off: !prog, go: () => (Save.d.run && Save.d.run.cp ? go('Level', { level: Save.d.run.level }) : go('Map')) }, { label: TITLE.cv, off: !cv, go: () => go('CV', { back: 'Title' }) }, { label: TITLE.settings, go: () => { this.menu.enabled = false; this.scene.launch('Settings', { back: 'TitleUI' }); this.scene.bringToTop('Settings'); } }, { label: PM.title, go: () => { this.hint.setText(''); pickMp3(() => this.hint.setText(PM.loading), (m, bad) => { if (!this.sys.isActive()) return; this.hint.setText(m).setColor(bad ? '#ffb0a8' : '#c8ffd8'); this.songLabel(); }); } }], { gap: 47, h: 42 }); this.songLabel(); Audio.loading.then(() => this.sys.isActive() && this.songLabel()); if (prog) { this.menu.i = 1; this.menu.draw(); }
+    this.events.on('resumeMenu', () => { this.menu.enabled = true; this.songLabel(); }); this.hint = txt(this, W - 12, H - 16, TITLE.hint, 20, '#e8f0ff', { ox: 1 }); this.cameras.main.fadeIn(600, 20, 14, 30);
   }
-  confirm(yes) { this.menu.hide(); const els = [panel(this, W / 2, 372, 720, 190, 'panel_dark'), txt(this, W / 2, 316, TITLE.confirmNew, 28)]; const m = new Menu(this, W / 2, 372, [{ label: TITLE.no, go: () => { m.hide(); els.forEach((e) => e.destroy()); this.menu.hide(false); } }, { label: TITLE.yes, go: yes }], { gap: 52 }); m.enabled = false; this.time.delayedCall(150, () => { m.enabled = true; }); }
+  songLabel() { this.menu.label(4, Audio.customName ? PM.titleMine : PM.title); }
+  /** Before the first level: offer to import a soundtrack. */
+  askSong(begin) {
+    this.menu.hide(); const els = [panel(this, W / 2, 392, 760, 238, 'panel_dark'), txt(this, W / 2, 306, PM.ask, 34, '#fff0a0'), txt(this, W / 2, 342, PM.askSub, 24)]; const msg = txt(this, W / 2, 490, '', 22, '#c8ffd8'); els.push(msg); let busy = false;
+    const m = new Menu(this, W / 2, 392, [{ label: PM.askPick, go: () => { if (busy) return; pickMp3(() => { busy = true; msg.setText(PM.loading).setColor('#c8ffd8'); }, (s, bad, playing) => { busy = false; if (!this.sys.isActive()) return; msg.setText(s).setColor(bad ? '#ffb0a8' : '#c8ffd8'); if (playing) { m.enabled = false; this.time.delayedCall(1200, begin); } }); } }, { label: PM.askSkip, go: () => { if (busy) return; m.enabled = false; begin(); } }], { gap: 52 }); m.enabled = false; this.time.delayedCall(150, () => { m.enabled = true; });
+  }
+  confirm(yes) { this.menu.hide(); const els = [panel(this, W / 2, 372, 720, 190, 'panel_dark'), txt(this, W / 2, 316, TITLE.confirmNew, 28)]; const m = new Menu(this, W / 2, 372, [{ label: TITLE.no, go: () => { m.hide(); els.forEach((e) => e.destroy()); this.menu.hide(false); } }, { label: TITLE.yes, go: () => { m.hide(); els.forEach((e) => e.destroy()); yes(); } }], { gap: 52 }); m.enabled = false; this.time.delayedCall(150, () => { m.enabled = true; }); }
 }
 
 // ------------------------------------------------------------------ world map
@@ -106,10 +118,7 @@ export class Settings extends Phaser.Scene {
   showReset() { const i = 5; const on = !!Audio.customName; this.menu.items[i].off = !on; const { p, t } = this.menu.rows[i]; p.setAlpha(on ? 1 : 0.4); t.setAlpha(on ? 1 : 0.4); if (!on && this.menu.i === i) this.menu.i = 4; this.menu.draw(); }
   say(s, bad) { if (this.msg && this.msg.active) this.msg.setText(s).setColor(bad ? '#ff9a8a' : '#8ff0c0'); }
   done(s, bad) { this.busySong = false; if (!this.sys.isActive()) return; this.upd(); this.showReset(); this.say(s, bad); }
-  pickSong() {
-    if (this.busySong) return; const el = document.createElement('input'); el.type = 'file'; el.accept = '.mp3,audio/mpeg,audio/mp3'; el.id = 'leo-song'; el.style.display = 'none'; document.getElementById('leo-song')?.remove(); document.body.appendChild(el);
-    el.onchange = () => { const f = el.files[0]; el.remove(); if (!f) return; this.busySong = true; this.say(PM.loading); Audio.choose(f).then((ok) => this.done(ok ? PM.saved : PM.unsaved, !ok), (e) => this.done(Object.values(PM).includes(e.message) ? e.message : PM.failed, true)); }; el.click();
-  }
+  pickSong() { if (this.busySong) return; pickMp3(() => { this.busySong = true; this.say(PM.loading); }, (m, bad) => this.done(m, bad)); }
   resetSong() { if (this.busySong) return; this.busySong = true; this.say(PM.loading); Audio.unchoose().then(() => this.done(PM.back), () => this.done(PM.failed, true)); }
   close() { const b = this.scene.get(this.back); this.scene.stop(); if (b.menu) this.time.delayedCall(0, () => {}); setTimeout(() => { if (b.menu) b.menu.enabled = true; b.events.emit('resumeMenu'); }, 120); }
 }

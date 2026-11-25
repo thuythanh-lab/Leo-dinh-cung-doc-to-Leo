@@ -3,6 +3,8 @@ dist/
 tests/shots/
 # source asset library: untouched originals, too large for git
 /assets/
+# private music: never publish
+*[Hh]edwig*
 *.log
 __pycache__/
 .claude/

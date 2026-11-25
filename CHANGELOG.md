@@ -2,6 +2,12 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V2.4 - Soundtrack import
+- Import an MP3 before starting (title screen, or the prompt on Start the PhD) or in Settings; kept in IndexedDB, never uploaded
+- It becomes the one gameplay soundtrack and plays exactly as recorded: no trimming, level changes or edits
+- The composed theme from V2.3 is removed; without an import the licensed level tracks play
+- Any Hedwig file is now git-ignored everywhere
+
 ## V2.3 - Original orchestral theme and Choose Your Own Soundtrack
 - New original waltz (3:47, celesta, strings, woodwinds, harp, horn) is the continuous gameplay soundtrack on the public site
 - Settings: choose an MP3 from the device; kept in IndexedDB, never uploaded; one button restores the original

@@ -1,5 +1,5 @@
 import { Save } from './Save.js';
-import { THEME, GAMEPLAY, loadTheme, builtIn, readPicked, store, forget } from './theme.js';
+import { THEME, GAMEPLAY, loadTheme, localSong, readPicked, store, forget } from './theme.js';
 
 export const MUSIC = ['menu', 'map', 'campus', 'library', 'water', 'garden', 'archive', 'tower', 'boss', 'treasury', 'office', 'boss2', 'ending', 'nature'];
 export const SFX = ['jump', 'coffee', 'special', 'hurt', 'cast', 'stomp', 'thud', 'stampno', 'stampyes', 'achieve', 'fanfare', 'secret', 'summon', 'vanish', 'checkpoint', 'splash', 'cooked', 'boing', 'rumble', 'laser', 'confetti', 'typing',
@@ -15,7 +15,7 @@ class AudioMan {
     this.game.sound.play(`s_${k}`, { volume: Save.settings.sfx * (GAIN[k] ?? 0.85) * (o.v ?? 1), rate: o.rate ?? 1 });
   }
   music(scene, k, fade = 900) {
-    this.ask = k;
+    this.ask = k; this.askScene = scene;
     if (GAMEPLAY.has(k)) {
       if (!this.ready) { this.loading.then(() => { if (this.ask === k && scene.sys.isActive()) this.music(scene, k, fade); }); return; }
       if (this.theme) { this.ambient(scene, k === 'nature'); k = THEME; }
@@ -42,8 +42,12 @@ class AudioMan {
     if (live) this.swap(THEME, 400); else if (GAMEPLAY.has(this.want)) { this.want = THEME; this.swap(THEME, 400); }
   }
   /** Use the player's MP3. Resolves true if it was also remembered for next time. */
-  async choose(file) { await this.loading; const p = await readPicked(this.game, file); this.setTheme(p.buffer, p.name); try { await store({ bytes: p.bytes, name: p.name }); return true; } catch { return false; } }
-  async unchoose() { const b = await builtIn(this.game); await forget(); this.setTheme(b, null); }
+  async choose(file) { await this.loading; const p = await readPicked(this.game, file); this.setTheme(p.buffer, p.name); try { await store({ bytes: p.bytes, name: p.name }); navigator.storage?.persist?.().catch(() => {}); return true; } catch { return false; } }
+  async unchoose() {
+    await forget(); const b = await localSong(this.game); if (b) return this.setTheme(b, null);
+    const key = `m_${THEME}`; const live = this.want === THEME; this.theme = false; this.customName = null; this.pos = 0; this.ambient(this.askScene, false);
+    if (live) { this.want = null; this.swap(null, 300); } if (this.game.cache.audio.exists(key)) this.game.cache.audio.remove(key); if (live) this.music(this.askScene, this.ask, 400);
+  }
   swap(k, fade) {
     const old = this.cur; this.cur = null; const back = k && this.out && this.out.key === `m_${k}` ? this.out : null; if (back) this.out = null; const main = `m_${THEME}`; if (old && old.key === main) this.pos = old.seek; // the theme resumes where it stopped
     if (old) { this.out = old; this.ramp(old, 0, fade, () => { if (this.out === old) this.out = null; old.stop(); old.destroy(); }); }

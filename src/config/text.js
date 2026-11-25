@@ -123,6 +123,7 @@ Object.assign(SIGNS, {
 });
 
 export const P_MUSIC = {
-  pick: 'Choose Your Own Soundtrack', mine: (n) => `Soundtrack: ${n}`, reset: 'Use the original soundtrack', loading: 'Loading your soundtrack...', saved: 'Saved on this device. It is never uploaded.', unsaved: 'Playing now, but this browser could not save it.', back: 'Original soundtrack restored.',
+  pick: 'Import Your Soundtrack (MP3)', mine: (n) => `Soundtrack: ${n}`, reset: 'Remove imported soundtrack', loading: 'Loading your soundtrack...', saved: 'Saved on this device. It is never uploaded.', unsaved: 'Playing now, but this browser could not save it.', back: 'Default soundtrack restored.',
+  title: 'Import soundtrack', titleMine: 'Soundtrack: imported', ask: 'Play with your own soundtrack?', askSub: 'Choose an MP3 from this device. It stays here and is never uploaded.', askPick: 'Choose MP3', askSkip: 'Use the default music',
   notMp3: 'Please choose an MP3 file.', tooBig: 'That file is too long (max 20 min, 60 MB).', bad: 'That MP3 could not be played.', unsupported: 'This browser cannot play a custom soundtrack.', failed: 'That did not work. Please try again.',
 };

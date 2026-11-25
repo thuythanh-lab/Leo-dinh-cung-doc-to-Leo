@@ -1,3 +1,4 @@
 import l1 from './level1.js';
+import l2 from './level2.js';
 
-export const LEVEL_DEFS = { 1: l1 };
+export const LEVEL_DEFS = { 1: l1, 2: l2 };

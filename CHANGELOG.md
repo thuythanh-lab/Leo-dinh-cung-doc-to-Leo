@@ -2,6 +2,13 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V3.0 - The Đốc Tờ Era (complete game)
+- Level 7: supervisor approval ("Not bad.") and the Reviewer #2 fight
+- Cinematics: the defence, beyond the summit, congratulatory letter, Academic Oracle with five career predictions
+- Letter and oracle reopen from the title screen after completion, even after starting over
+- Three new achievements, all milestones in the CV, world map complete
+- No new dependencies; existing music reused; saves and audio settings kept
+
 ## V2.4 - Soundtrack import
 - Import an MP3 before starting (title screen, or the prompt on Start the PhD) or in Settings; kept in IndexedDB, never uploaded
 - It becomes the one gameplay soundtrack and plays exactly as recorded: no trimming, level changes or edits

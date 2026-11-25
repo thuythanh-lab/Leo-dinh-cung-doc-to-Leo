@@ -16,7 +16,7 @@ export const QUEST1 = { title: 'NEW QUEST: BECOME ĐỐC TỜ', sub: 'Difficulty
 export const DEATH = ['Bro is cooked.', 'Academic setback detected.', 'PhD.exe has stopped responding.', 'Mentally AFK.', "It's giving burnout."];
 export const DEATH_SUB = 'Respawning at the nearest coffee machine...';
 
-export const NAMES = { leo: 'Léo', ra: 'Research Assistant', prof: 'Emeritus Professor', student: 'First-year', margreet: 'Margreet Zwarteveen', donna: 'Donna Haraway', star: 'Susan Leigh Star (a manifestation)' };
+export const NAMES = { leo: 'Léo', ra: 'Research Assistant', prof: 'Emeritus Professor', student: 'First-year', margreet: 'Margreet Zwarteveen', donna: 'Donna Haraway', star: 'Susan Leigh Star (a manifestation)', sup: 'Supervisor' };
 export const FICTION_NOTE = 'Fictional dialogue, written with affection.';
 
 export const LEVELS = [
@@ -26,10 +26,9 @@ export const LEVELS = [
   { id: 4, name: 'The Funding Hunger Games', sub: 'May the budget line be ever in your favour.' },
   { id: 5, name: 'Bureaucracy: The Final Form', sub: 'Please complete Form 1 to request Form 1.' },
   { id: 6, name: 'The Fieldwork Survival Era', sub: 'Phase 2. The plan was theoretical.', locked: 'Finish Phase 1 first. Something is rustling out there.' },
+  { id: 7, name: 'The Đốc Tờ Era', sub: 'The supervisor will see you now.', locked: 'Hidden by clouds. Finish the dissertation first.' },
 ];
-export const FUTURE = [
-  { name: 'Phase 3: ???', locked: 'Hidden by clouds. Locked.', soon: 'The Đốc Tờ Era. Still under review.' },
-];
+export const FUTURE = [];
 
 export const ASSIST = {
   intro: [['leo', 'There seems to be quite a lot of work.'], ['ra', 'Have you considered delegation?'], ['leo', 'Is that allowed?'], ['ra', 'For ten seconds.']],
@@ -97,7 +96,7 @@ export const ENDING = {
 export const UI = {
   paused: 'PAUSED', pausedSub: 'Your supervisor has noticed.', resume: 'Resume', restart: 'Restart level', map: 'World map', settings: 'Settings', cv: 'Academic CV', title: 'Title screen',
   music: 'Music', sfx: 'Sound effects', full: 'Fullscreen', touch: 'Touch controls', auto: 'Auto', on: 'On', off: 'Off', back: 'Back', mapHint: 'Choose a destination. Enter / tap to travel.', skip: 'Skip ▸',
-  cvTitle: 'ACADEMIC CV', cvName: 'Léo, PhD candidate', cvMain: 'Milestones', cvSecret: 'Footnotes (secret)', cvLocked: '???', cvFuture: 'Future chapters: redacted', cvHint: 'Not yet peer reviewed.', cvPubs: 'Publications', complete: 'LEVEL COMPLETE', rotate: 'Best played in landscape.',
+  cvTitle: 'ACADEMIC CV', cvName: 'Léo, PhD candidate', cvMain: 'Milestones', cvSecret: 'Footnotes (secret)', cvLocked: '???', cvLast: 'The Đốc Tờ Era', cvHint: 'Not yet peer reviewed.', cvPubs: 'Publications', complete: 'LEVEL COMPLETE', rotate: 'Best played in landscape.',
   controls: 'Move: Arrows / WASD    Jump: Space    Slide: Down while running\nMagic pen + interact: X or J    Assistant: E    Pause: Esc',
 };
 
@@ -118,6 +117,7 @@ export const P2 = {
   endCard: ['PHASE 2 COMPLETE', 'Dissertation: Completed.', 'Sanity: Under review.'], endNext: 'Next quest: THE ĐỐC TỜ ERA',
 };
 Object.assign(SIGNS, {
+  p3door: 'Supervisor: in.\nMood: unknown.',
   p2plan: 'Day 1 of fieldwork.\nThe plan is laminated.', p2bridge: 'Bridge: 60% complete.\nSince 2009.', p2goat: 'Interview in progress.', p2bus: 'Next bus: Tuesday.\nNext buffalo: now.', p2rope: 'Maximum load:\none methodology.', p2station: 'Field station.\nWi-Fi: spiritual.',
   p2doc: 'thesis_final.docx\n(Not responding)', p2cloud: 'Forecast: deadlines,\n100% chance.', p2block: 'Chapter 2\n|', p2super: 'From: Supervisor\n"Quick comments :)"', p2super2: 'From: Supervisor\n"One more small thing."', p2last: 'Word count: yes.',
 });
@@ -126,4 +126,23 @@ export const P_MUSIC = {
   pick: 'Import Your Soundtrack (MP3)', mine: (n) => `Soundtrack: ${n}`, reset: 'Remove imported soundtrack', loading: 'Loading your soundtrack...', saved: 'Saved on this device. It is never uploaded.', unsaved: 'Playing now, but this browser could not save it.', back: 'Default soundtrack restored.',
   title: 'Import soundtrack', titleMine: 'Soundtrack: imported', ask: 'Play with your own soundtrack?', askSub: 'Choose an MP3 from this device. It stays here and is never uploaded.', askPick: 'Choose MP3', askSkip: 'Use the default music',
   notMp3: 'Please choose an MP3 file.', tooBig: 'That file is too long (max 20 min, 60 MB).', bad: 'That MP3 could not be played.', unsupported: 'This browser cannot play a custom soundtrack.', failed: 'That did not work. Please try again.',
+};
+
+// ------------------------------------------------------------------ Final phase
+export const P3 = {
+  sub: 'The supervisor will see you now.',
+  supTalk: [['leo', 'I have completed the dissertation.'], ['sup', 'All of it?'], ['leo', 'All of it.'], ['sup', '...'], ['sup', 'Let me see.']],
+  reading: ['Reading...', 'Still reading...', '*turns page*', '*turns page back*', 'Hmm.'], notBad: '"Not bad."', legend: ['SUPERVISOR SAID "NOT BAD"', 'Generational academic validation.'], summoned: 'Reviewer #2 would like a word.',
+  boss: ['REVIEWER #2', 'Just a few minor comments.'], phases: ['Vague questions incoming.', 'Completely irrelevant questions incoming.', 'One last question...'],
+  vague: ['Could you elaborate further?', 'Could you elaborate on the elaboration?', 'Unclear. Please clarify everything.', 'Interesting. But is it?'],
+  odd: ['Have you considered ducks?', 'What does this mean for toast?', 'Why is this paper not about fish?', 'Cite me. Then cite me again.', 'More of a comment than a question.'],
+  giant: 'This needs a second dissertation.', grab: 'Reach the green seal!', scope: 'RESPECTFULLY, OUTSIDE THE SCOPE.',
+  slide: ['THE DEFENCE'], slides: ['Slide 1: It depends.', 'Slide 2: On what? Also depends.', 'Slide 3: Thank you. Questions?'], committee: 'THE COMMITTEE', ask: 'So... why?', answer: 'Because it needed to be questioned.', passed: 'DEFENCE PASSED', phd: ['ĐỐC TỜ UNLOCKED', 'Bro actually became a doctor.'], progress: 'PhD progress',
+  summit: ['You made it to the summit.', 'But look how much more there is to explore.', 'Your next adventure is yours to choose.'],
+  open: 'Click the golden seal', closeLetter: 'Close the letter',
+  letter: { head: 'ĐỐC TỜ ON BOARD', dear: 'Dear Dr. Léo,', body: ['You came. You questioned. You theorised. You revised.', 'And somehow, you cooked.', 'After surviving bureaucracy, rejected publications, funding applications, existential crises and Reviewer #2, you are officially a Đốc Tờ.', 'We are incredibly proud of you.', "Here's to bigger adventures, exciting opportunities and significantly fewer major revisions."], end: 'Congratulations, Đốc Tờ Léo!' },
+  oracle: ['THE ACADEMIC ORACLE', 'The PhD is over. The career delulu begins.'], reveal: 'REVEAL MY DESTINY', reroll: 'REROLL MY CAREER', leave: 'Finish', found: 'Destinies', gaze: ['The vibes are aligning...', 'Consulting the footnotes...', 'Peer reviewing your future...'],
+  fates: ['Academic job with HIGH income taxes.', 'Academic job but where is the tax.', 'Corporate suits may look nice on you.', 'Hope you read enough entrepreneur self-help books.', '“WHAT ARE YOU DOING HANGING AROUND? Put on your apron and fry the nem RIGHT NOW”, Master Chi said.'],
+  nem: ['“WHAT ARE YOU DOING HANGING AROUND?', 'Put on your apron and fry the nem', 'RIGHT NOW”'], nemShout: 'Yes, Master Chi!', corp: ['Synergy: 100%', 'Circling back', 'Per my last email', 'Dr. Deliverable'],
+  disclaimer: 'Source: vibes. Methodology: questionable. Peer review: pending.', final: "Whatever path you choose, we're rooting for you, Dr. Léo.", menuLetter: 'Congratulatory letter', menuOracle: 'Academic Oracle',
 };

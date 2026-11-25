@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { TITLE, UI, LEVELS, FUTURE, P_MUSIC as PM } from '../config/text.js';
+import { TITLE, UI, LEVELS, FUTURE, P_MUSIC as PM, P3 } from '../config/text.js';
 import { Save } from '../core/Save.js';
 import { Audio, SFX } from '../core/Audio.js';
 import { txt, panel, makeAnims, fadeTo, clamp, onKey } from '../core/util.js';
@@ -17,7 +17,7 @@ export class Boot extends Phaser.Scene {
     const A = 'assets/art/'; this.load.atlas('atlas', `${A}atlas.png`, `${A}atlas.json`); this.load.json('atlasmeta', `${A}atlas.json`); this.load.json('leoSheet', 'assets/characters/leo.json'); this.load.spritesheet('leo', 'assets/characters/leo.png', { frameWidth: 32, frameHeight: 36 });
     THEMES.forEach((n) => this.load.image(`tiles_${n}`, `${A}tiles_${n}.png`));
     const layers = { campus: ['sky', 'far', 'clouds', 'mid', 'near'], tower: ['sky', 'far', 'clouds', 'mid', 'near'], field: ['sky', 'far', 'clouds', 'mid', 'near'], sunset: ['sky', 'far', 'clouds', 'mid', 'near'] }; THEMES_BG.forEach((n) => (layers[n] || ['sky', 'far', 'mid', 'near']).forEach((l) => this.load.image(`bg_${n}_${l}`, `${A}bg_${n}_${l}.png`)));
-    ['title_mountain', 'title_town', 'worldmap', 'notebook', 'clouds_big', 'fieldscape', 'vista'].forEach((n) => this.load.image(n, `${A}${n}.png`)); SFX.forEach((s) => this.load.audio(`s_${s}`, `assets/audio/sfx/${s}.mp3`)); this.load.audio('m_menu', 'assets/audio/music/menu.mp3');
+    ['title_mountain', 'title_town', 'worldmap', 'notebook', 'clouds_big', 'fieldscape', 'vista', 'horizon'].forEach((n) => this.load.image(n, `${A}${n}.png`)); SFX.forEach((s) => this.load.audio(`s_${s}`, `assets/audio/sfx/${s}.mp3`)); this.load.audio('m_menu', 'assets/audio/music/menu.mp3');
   }
   async create() {
     makeAnims(this); Audio.init(this.game);
@@ -36,7 +36,7 @@ function pickMp3(start, done) {
 class Menu {
   constructor(scene, x, y, items, o = {}) {
     this.s = scene; this.items = items.filter(Boolean); this.i = this.items.findIndex((t) => !t.off); this.enabled = true; const gap = o.gap || 54;
-    this.rows = this.items.map((it, k) => { const p = panel(scene, x, y + k * gap, o.w || 340, o.h || 46, 'panel_btn'); const t = txt(scene, x, y + k * gap - 3, it.label, 30, it.off ? '#7a7494' : '#fff6e0', { st: 4 }); if (it.off) p.setAlpha(0.55); p.setInteractive({ useHandCursor: !it.off }); p.on('pointerover', () => { if (!it.off && this.enabled) { this.i = k; this.draw(); } }); p.on('pointerup', () => { if (this.enabled && !it.off) { this.i = k; this.draw(); this.go(); } }); return { p, t }; });
+    this.rows = this.items.map((it, k) => { const mx = it.x ?? x; const my = it.y ?? y + k * gap; const p = panel(scene, mx, my, it.w || o.w || 340, o.h || 46, 'panel_btn'); const t = txt(scene, mx, my - 3, it.label, 30, it.off ? '#7a7494' : '#fff6e0', { st: 4 }); if (it.off) p.setAlpha(0.55); p.setInteractive({ useHandCursor: !it.off }); p.on('pointerover', () => { if (!it.off && this.enabled) { this.i = k; this.draw(); } }); p.on('pointerup', () => { if (this.enabled && !it.off) { this.i = k; this.draw(); this.go(); } }); return { p, t }; });
     const kb = scene.input.keyboard; const mv = (d) => { if (!this.enabled) return; let n = this.i; for (let g = 0; g < this.items.length; g++) { n = (n + d + this.items.length) % this.items.length; if (!this.items[n].off) break; } if (n !== this.i) { this.i = n; Audio.sfx('move'); this.draw(); } };
     this.h = (e) => { if (!this.enabled || !scene.scene.isActive()) return; if (['ArrowUp', 'w', 'W'].includes(e.key)) mv(-1); else if (['ArrowDown', 's', 'S'].includes(e.key)) mv(1); else if (['ArrowLeft', 'a'].includes(e.key)) this.side(-1); else if (['ArrowRight', 'd'].includes(e.key)) this.side(1); else if (['Enter', ' ', 'x', 'j', 'z'].includes(e.key) && !e.repeat) this.go(); };
     const bound = onKey(scene, this.h); scene.events.once('shutdown', () => kb.off('keydown', bound)); this.draw();
@@ -70,7 +70,7 @@ export class TitleUI extends Phaser.Scene {
     const sub = txt(this, W / 2, 238, TITLE.sub, 30, '#ffffff', { st: 6 }).setAlpha(0); this.tweens.add({ targets: sub, alpha: 1, delay: 1400, duration: 500 });
     const go = (k, d) => { this.menu.enabled = false; const t = this.scene.get('Title'); fadeTo(t, k, d, 500); this.cameras.main.fadeOut(500, 20, 14, 30); };
     const start = () => Audio.loading.then(() => (Audio.theme ? begin() : this.askSong(begin))); const begin = () => { Save.reset(); Save.d.started = true; Save.save(); go('Intro'); }; const prog = Save.hasProgress(); const cv = Object.keys(Save.d.ach).length > 0;
-    this.menu = new Menu(this, 250, 304, [{ label: TITLE.start, go: () => (prog ? this.confirm(start) : start()) }, { label: TITLE.cont, off: !prog, go: () => (Save.d.run && Save.d.run.cp ? go('Level', { level: Save.d.run.level }) : go('Map')) }, { label: TITLE.cv, off: !cv, go: () => go('CV', { back: 'Title' }) }, { label: TITLE.settings, go: () => { this.menu.enabled = false; this.scene.launch('Settings', { back: 'TitleUI' }); this.scene.bringToTop('Settings'); } }, { label: PM.title, go: () => { this.hint.setText(''); pickMp3(() => this.hint.setText(PM.loading), (m, bad) => { if (!this.sys.isActive()) return; this.hint.setText(m).setColor(bad ? '#ffb0a8' : '#c8ffd8'); this.songLabel(); }); } }], { gap: 47, h: 42 }); this.songLabel(); Audio.loading.then(() => this.sys.isActive() && this.songLabel()); if (prog) { this.menu.i = 1; this.menu.draw(); }
+    this.menu = new Menu(this, 250, 304, [{ label: TITLE.start, go: () => (prog ? this.confirm(start) : start()) }, { label: TITLE.cont, off: !prog, go: () => (Save.d.run && Save.d.run.cp ? go('Level', { level: Save.d.run.level }) : go('Map')) }, { label: TITLE.cv, off: !cv, go: () => go('CV', { back: 'Title' }) }, { label: TITLE.settings, go: () => { this.menu.enabled = false; this.scene.launch('Settings', { back: 'TitleUI' }); this.scene.bringToTop('Settings'); } }, { label: PM.title, go: () => { this.hint.setText(''); pickMp3(() => this.hint.setText(PM.loading), (m, bad) => { if (!this.sys.isActive()) return; this.hint.setText(m).setColor(bad ? '#ffb0a8' : '#c8ffd8'); this.songLabel(); }); } }, ...(Save.d.complete ? [{ label: P3.menuLetter, x: 806, y: 400, w: 276, go: () => go('Letter', { again: true }) }, { label: P3.menuOracle, x: 806, y: 447, w: 276, go: () => go('Oracle') }] : [])], { gap: 47, h: 42 }); this.songLabel(); Audio.loading.then(() => this.sys.isActive() && this.songLabel()); if (prog) { this.menu.i = 1; this.menu.draw(); }
     this.events.on('resumeMenu', () => { this.menu.enabled = true; this.songLabel(); }); this.hint = txt(this, W - 12, H - 16, TITLE.hint, 20, '#e8f0ff', { ox: 1 }); this.cameras.main.fadeIn(600, 20, 14, 30);
   }
   songLabel() { this.menu.label(4, Audio.customName ? PM.titleMine : PM.title); }
@@ -83,7 +83,7 @@ export class TitleUI extends Phaser.Scene {
 }
 
 // ------------------------------------------------------------------ world map
-const NODES = [[58, 226], [136, 196], [212, 208], [278, 164], [352, 146], [428, 112]]; const FN = [[446, 54]]; const LAST = NODES.length; // last playable level
+const NODES = [[58, 226], [136, 196], [212, 208], [278, 164], [352, 146], [428, 112], [446, 54]]; const FN = []; const LAST = NODES.length; // last playable level
 export class Map_ extends Phaser.Scene {
   constructor() { super('Map'); }
   init(d) { this.from = d && d.from; }

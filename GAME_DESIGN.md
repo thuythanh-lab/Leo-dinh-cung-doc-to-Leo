@@ -30,3 +30,6 @@ Hooks: `src/core/future.js`, reserved save slots in `Save.d.future`, append-only
 
 ## Phase 2: The Fieldwork Survival Era (level 6)
 One map, two zones. Field: five optional research findings, a flood that raises rafts, a landslide (assistant, pen or jump over), a rideable buffalo, and a rope bridge that collapses onto a lower route. Dissertation: five chapter pages, a stress cloud, a cursor that needs the inspiration bulb, and two supervisor stamps that destroy the path and open another. Missing findings or chapters never block the ending. All copy is in `P2` in `src/config/text.js`.
+
+## The Đốc Tờ Era (level 7 and cinematics)
+Supervisor scene, one 35-45 s boss in three rounds of 11 s (vague, irrelevant, second dissertation), then no more gameplay: defence, summit, letter, oracle. Predictions are dealt from a shuffled deck of five saved in `future.oracle`. `triumph`, `oracle` and `nem` are music cues that reuse existing files and are never replaced by an imported soundtrack.

@@ -213,9 +213,9 @@ def sprites():
 
 
 # ------------------------------------------------------------------ phase 2 ending vista
-def vista():
+def vista(backdrop=True):
     w, h = 960, 540; im = bg.sky(['#1f3a7c', '#3a68b8', '#78a4dc', '#f0b8a8', '#ffe0b0', '#fff4d8'], None, 0, w, h)
-    far = bg.mountains(5, 252, 36, bg.MT_FAR, bg.SNOW, 222, w=w, h=h, haze='#f0d8c8'); paste(im, far, 0, 0)
+    far = bg.mountains(5, 252, 36, bg.MT_FAR, bg.SNOW, 222, w=w, h=h, haze='#f0d8c8'); paste(im, far, 0, 0) if backdrop else im.paste(new(w, h), (0, 0))
     m = ui.bigmountain(w, h, [(800, 30, .7), (560, 243, .46), (330, 342, .37), (110, 422, .3)], 51, ['#34467c', '#4c6298', '#7088b8', '#a4b8d8'], ui.SN, 158, 530); paste(im, m, 0, 0)
     g = bg.mountains(63, 486, 12, ['#2f6b4c', '#458a58', '#6aa868', '#a0cc7c'], w=w, h=h, haze='#5a9c78', rough=.5); paste(im, g, 0, 0)
     # flat ridge Léo stands on
@@ -271,4 +271,4 @@ def main():
         paste(c, Image.open(f'{OUT}/vista.png').convert('RGBA').resize((480, 360)), x, y); c.crop((0, 0, 1500, y + 400)).save(sys.argv[1])
 
 
-main()
+if __name__ == '__main__': main()

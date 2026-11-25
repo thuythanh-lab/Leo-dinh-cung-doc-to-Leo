@@ -8,6 +8,7 @@ import HUD from './scenes/HUD.js';
 import { Boot, Title, TitleUI, Map_, Settings, Pause } from './scenes/menus.js';
 import { CV } from './scenes/cv.js';
 import { Intro, IntroUI, Ending, EndingUI } from './scenes/cinematics.js';
+import { Defence, Summit, SummitUI, Letter, Oracle } from './scenes/finale.js';
 import { Ending2, Ending2UI } from './scenes/ending2.js';
 
 const game = new Phaser.Game({
@@ -15,7 +16,7 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, fullscreenTarget: 'game' },
   physics: { default: 'arcade', arcade: { gravity: { y: 0 }, tileBias: 16, fixedStep: false, customUpdate: true } },
   input: { activePointers: 4 }, loader: { maxRetries: 5 }, audio: { disableWebAudio: false },
-  scene: [Boot, Title, TitleUI, Intro, IntroUI, Map_, LevelScene, HUD, CV, Settings, Pause, Ending, EndingUI, Ending2, Ending2UI],
+  scene: [Boot, Title, TitleUI, Intro, IntroUI, Map_, LevelScene, HUD, CV, Settings, Pause, Ending, EndingUI, Ending2, Ending2UI, Defence, Summit, SummitUI, Letter, Oracle],
 });
 window.__game = game;
 if (location.search.includes('debug')) import('./core/Input.js').then((m) => { window.__C = m.Controls; });

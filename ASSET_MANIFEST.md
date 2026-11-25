@@ -22,3 +22,6 @@ New art is original, drawn by `tools/art/phase2.py` and appended to the atlas; P
 ## Local-only audio (not redistributed)
 `assets/audio/Harry Potter Hedwig s Song HQ.mp3`: redistribution rights not confirmed. Git-ignored, never copied to `dist`, served only by the local Vite servers. Public default: the licensed level tracks.
 
+
+## Final phase
+Original art from `tools/art/phase3.py`, appended to the atlas. No new audio.

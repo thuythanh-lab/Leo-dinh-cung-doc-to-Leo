@@ -24,7 +24,7 @@ Touch buttons appear on phones. Force them in Settings.
 ## Structure
 Docs: `CHANGELOG.md`, `ASSET_MANIFEST.md`, `GAME_DESIGN.md`, `TEST_REPORT.md`.
 
-`core/` save, audio, input, shared UI, `future.js` (Phase 2/3 hooks) · `entities/` player, assistant, platforms, obstacles, enemies, FX · `levels/` tile builder and the five levels · `scenes/` level, HUD, menus, map, CV, cinematics · `tools/` art and audio pipelines · `tests/` automated playthrough.
+`core/` save, audio, input, shared UI, soundtrack import · `entities/` player, assistant, platforms, obstacles, enemies, FX · `levels/` tile builder and the seven levels · `scenes/` level, HUD, menus, map, CV, cinematics · `tools/` art and audio pipelines · `tests/` automated playthrough.
 
 ## Test
 With `npm run dev -- --port 5210` running: `node tests/playthrough.mjs` (plays all five levels with real inputs) and `node tests/system.mjs` (menus, saves, death, RA timing, touch, ending).
@@ -38,3 +38,6 @@ The Vite base is relative (`./`), so all paths resolve under the repository sub-
 
 ## Phase 2
 Finish Phase 1 to unlock level 6 on the world map. Tests: `node tests/phase2.mjs`, `node tests/playthrough.mjs 6 [--mortal] [--detour]`.
+
+## Final phase
+Finish Phase 2 to unlock level 7. Copy lives in `P3` in `src/config/text.js`. Art: `tools/art/phase3.py` (run after `phase2.py`). Tests: `node tests/finale.mjs`, `node tests/playthrough.mjs 7`.

@@ -166,7 +166,7 @@ export default class LevelScene extends Phaser.Scene {
   celebrate() { this.player.forceAnim = 'leo_celebrate'; this.player.body.setVelocityX(0); }
   finish(extra) {
     if (this.finished) return; this.finished = 1; this.lock(true); this.celebrate(); this.fx.rain(2600); Audio.sfx('fanfare'); if (!this.tookDamage) this.unlock('productive'); Save.complete(this.levelId); const id = this.levelId;
-    this.wait(600, () => this.hud.complete(!this.run.flags.hurt, () => { Save.d.mapAt = Math.min(5, id + 1); if (id >= 5) { Save.d.mapAt = id; Save.save(); this.leave(id === 5 ? 'Ending' : 'Ending2'); } else { Save.save(); this.leave('Map', { from: id }); } })); extra && extra();
+    this.wait(600, () => this.hud.complete(!this.run.flags.hurt, () => { Save.d.mapAt = Math.min(5, id + 1); if (id >= 5) { Save.d.mapAt = id; Save.save(); this.leave({ 5: 'Ending', 6: 'Ending2', 7: 'Defence' }[id]); } else { Save.save(); this.leave('Map', { from: id }); } })); extra && extra();
   }
   leave(key, data) { if (this._leaving) return; this._leaving = true; this.cameras.main.fadeOut(500, 20, 14, 30); this.time.delayedCall(540, () => { this.scene.stop('HUD'); this.scene.start(key, data); }); }
 }

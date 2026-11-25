@@ -34,5 +34,5 @@ export class Ending2UI extends Phaser.Scene {
     [b, c].forEach((l, i) => { const q = txt(this, W / 2, 238 + i * 48, l, 36, '#fff6e0', { st: 7 }).setAlpha(0); this.time.delayedCall(900 + i * 900, () => { Audio.sfx('tick'); this.tweens.add({ targets: q, alpha: 1, duration: 250 }); }); });
     this.time.delayedCall(3200, () => { const n = txt(this, W / 2, 378, P2.endNext, 44, '#8ff0c0', { head: true, st: 8 }).setAlpha(0); this.tweens.add({ targets: n, alpha: 1, duration: 600 }); Audio.sfx('checkpoint'); }); this.time.delayedCall(4600, () => { this.ok = true; txt(this, W / 2, H - 27, '▸', 30); });
   }
-  out() { if (this.gone) return; this.gone = true; this.cameras.main.fadeOut(600, 20, 14, 30); fadeTo(this.scene.get('Ending2'), 'Map', {}, 600); }
+  out() { if (this.gone) return; this.gone = true; this.cameras.main.fadeOut(600, 20, 14, 30); fadeTo(this.scene.get('Ending2'), 'Map', { from: 6 }, 600); }
 }

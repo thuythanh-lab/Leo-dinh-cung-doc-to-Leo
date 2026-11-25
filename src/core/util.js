@@ -34,9 +34,9 @@ export function panel(scene, x, y, w, h, kind = 'panel_dark') {
 /** Register every multi-frame atlas entry as an animation of the same name. */
 export function makeAnims(scene) {
   const counts = scene.cache.json.get('atlasmeta').meta.counts;
-  const fps = { coffee: 6, special: 7, machine: 5, waterfall: 12, watertop: 6, fountain: 9, portal: 9, miniportal: 10, gremlin: 8, citation: 9, tracked: 12, format: 5, letter: 10, stress: 4, conveyor: 12, beetle: 7, writers: 2, sigil: 8, page: 7, framework: 6, spark: 14, dust: 14, coin: 12, bird: 7, boss_machine: 8, b_torch: 7, b_moth: 6, buffalo: 6, goat: 3, chicken: 6, mosquito: 14, finding: 5, bulb: 6, cursor: 2 };
+  const fps = { coffee: 6, special: 7, machine: 5, waterfall: 12, watertop: 6, fountain: 9, portal: 9, miniportal: 10, gremlin: 8, citation: 9, tracked: 12, format: 5, letter: 10, stress: 4, conveyor: 12, beetle: 7, writers: 2, sigil: 8, page: 7, framework: 6, spark: 14, dust: 14, coin: 12, bird: 7, boss_machine: 8, b_torch: 7, b_moth: 6, buffalo: 6, goat: 3, chicken: 6, mosquito: 14, finding: 5, bulb: 6, cursor: 2, grad: 1.2, grad_yay: 4, crystal: 5, wok: 8, nemleo: 5, coolleo: 4, suitleo: 2, q_giant: 5, scope: 8 };
   for (const [n, c] of Object.entries(counts)) {
-    if (c < 2 || n === 'word' || scene.anims.exists(n)) continue;
+    if (c < 2 || ['word', 'tc', 'sup', 'q_odd', 'seal', 'flap', 'money', 'hustle', 'plan', 'comm_a', 'comm_b', 'comm_c', 'taxman', 'profleo', 'headleo', 'reviewer2'].includes(n) || scene.anims.exists(n)) continue;
     let end = c - 1; let start = 0;
     if (n === 'boss_machine') end = 3;
     if (n === 'boss_stamp') end = 1;

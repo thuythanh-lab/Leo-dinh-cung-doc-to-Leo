@@ -4,6 +4,7 @@ import { THEME, GAMEPLAY, loadTheme, localSong, readPicked, store, forget } from
 export const MUSIC = ['menu', 'map', 'campus', 'library', 'water', 'garden', 'archive', 'tower', 'boss', 'treasury', 'office', 'boss2', 'ending', 'nature'];
 export const SFX = ['jump', 'coffee', 'special', 'hurt', 'cast', 'stomp', 'thud', 'stampno', 'stampyes', 'achieve', 'fanfare', 'secret', 'summon', 'vanish', 'checkpoint', 'splash', 'cooked', 'boing', 'rumble', 'laser', 'confetti', 'typing',
   'step', 'land', 'break', 'book', 'page', 'bookopen', 'bookclose', 'door', 'creak', 'coins', 'cloth', 'metal', 'pot', 'move', 'ok', 'back', 'tick', 'text', 'error', 'glitch', 'switch', 'open', 'close', 'pluck', 'glass', 'bong', 'question'];
+const FILE = { triumph: 'campus', oracle: 'archive', nem: 'office' }; // cinematic cues that reuse an existing track without becoming the gameplay theme
 const GAIN = { step: 0.16, land: 0.4, text: 0.3, typing: 0.5, coffee: 0.55, jump: 0.45, tick: 0.6, cast: 0.6, move: 0.7 };
 
 /** Independent music / sfx volume, lazy-loaded tracks and cross-fades. */
@@ -24,7 +25,7 @@ class AudioMan {
     const start = () => { if (this.want === k) this.swap(k, fade); };
     if (!k) return this.swap(null, fade);
     if (this.game.cache.audio.exists(`m_${k}`)) return start();
-    scene.load.audio(`m_${k}`, `assets/audio/music/${k}.mp3`); scene.load.once(`filecomplete-audio-m_${k}`, start); scene.load.start();
+    scene.load.audio(`m_${k}`, `assets/audio/music/${FILE[k] || k}.mp3`); scene.load.once(`filecomplete-audio-m_${k}`, start); scene.load.start();
     scene.events.once('shutdown', () => { if (this.want === k && !(this.cur && this.cur.key === `m_${k}`) && !this.game.cache.audio.exists(`m_${k}`)) this.want = null; }); // left before it loaded: let the next scene ask again
   }
   /** Wind and birds under the theme (Emergency Existential Crisis Room). */

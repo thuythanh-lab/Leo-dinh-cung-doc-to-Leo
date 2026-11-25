@@ -92,6 +92,7 @@ export default {
     if (L.flag('cursor')) build(true); new Cursor(L, 70, D - 2, { flag: 'cursor', onBreak: () => build() }); k.arc(73, D - 6, 10, 0.8, 1.1);
     // ---- supervisor feedback, round 1: the straight road is destroyed
     k.machine(87.6, D - 2); k.sign(90.6, D - 2, 'p2super'); k.gremlin(93, D - 2); chap(3, 97, D - 3.2);
+    k.machine(98, D - 2); // save at chapter 3, immediately before the feedback platform gap
     const run = [0, 1, 2, 3, 4].map((i) => k.collapse(102.4 + i * 4.2, D - 2, 'plat_para')); const alt = [[101.6, D - 4.4], [105.6, D - 6.8], [110.4, D - 7.6], [115, D - 6.4], [118.6, D - 4.2]].map(([x, y]) => { const p = k.collapse(x, y, 'plat_track'); p.fallen = true; p.setSolid(false); p.setAlpha(0); return p; });
     const showAlt = (q) => alt.forEach((p, i) => (q ? p.restore() : L.wait(i * 160, () => { p.restore(); Audio.sfx('typing'); }))); k.row(103, D - 8, 14, 1.1);
     if (L.flag('rw1')) { run.forEach((p) => { p.fallen = true; p.setSolid(false); p.setVisible(false); }); showAlt(true); } else {

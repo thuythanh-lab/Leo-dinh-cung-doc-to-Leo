@@ -31,7 +31,7 @@ With `npm run dev -- --port 5210` running: `node tests/playthrough.mjs` (plays a
 Debug links: `?level=3`, `?scene=CV`, `?scene=Ending`.
 
 ## Deploy
-Every push to `main` builds and publishes through GitHub Actions (`.github/workflows/deploy.yml`).
+Every push to `main` builds through GitHub Actions (`.github/workflows/deploy.yml`) and publishes to the `gh-pages` branch, which GitHub Pages serves.
 Public URL: https://thuythanh-lab.github.io/Leo-dinh-cung-doc-to-Leo/
 
 The Vite base is relative (`./`), so all paths resolve under the repository sub-path.

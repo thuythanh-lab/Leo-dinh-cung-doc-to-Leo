@@ -2,6 +2,9 @@
 
 Milestones V0.1 to V1.0 were assembled from the finished, tested Phase 1 code when the repository was connected. Each one builds on its own.
 
+## V0.8 - Academic CV and achievement system
+- Academic CV notebook with 14 entries
+
 ## V0.7 - Bureaucratic Labyrinth
 - Three stamps and CÔNG VĂN walls
 - The Guardian of the Official Stamp

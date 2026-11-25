@@ -6,8 +6,8 @@ import { VIEW } from './config/balance.js';
 import LevelScene from './scenes/LevelScene.js';
 import HUD from './scenes/HUD.js';
 import { Boot, Title, TitleUI, Map_, Settings, Pause } from './scenes/menus.js';
+import { CV } from './scenes/cv.js';
 
-class CV extends Phaser.Scene { constructor() { super('CV'); } create(d) { this.scene.start('Map'); } }
 class Intro extends Phaser.Scene { constructor() { super('Intro'); } create() { this.scene.start('Level', { level: 1 }); } }
 class Ending extends Phaser.Scene { constructor() { super('Ending'); } create() { this.scene.start('Map'); } }
 const game = new Phaser.Game({
